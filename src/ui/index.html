@@ -1046,6 +1046,15 @@ async function zbAction(kind) {
   } catch (e) { toast(esc(e.message), "err", 7000); }
   finally { zbBusy = false; render(); }
 }
+async function restoreLauncher() {
+  if (S.env.gameRunning) { toast("Feche o Project Zomboid antes de restaurar os arquivos originais.", "warn", 6000); return; }
+  if (!await modal("Restaurar originais", "Isto volta ProjectZomboid64.json e ProjectZomboid64.bat (o lançador do jogo) para a cópia de antes da primeira alteração feita por este app.\nA configuração do ZombieBuddy (-agentlib:zbNative) e a memória do jogo (-Xmx) voltam ao padrão: mods Java como o Viewpoint deixam de carregar até você reinstalar o ZombieBuddy pelo app.\nSe o jogo foi atualizado depois disso e não abrir, use \"Verificar integridade dos arquivos\" na Steam.", "Restaurar", "Cancelar", true)) return;
+  try {
+    const ch = await call("restoreLauncher");
+    toast("Lançador do jogo:<br>• " + ch.map(esc).join("<br>• "), "ok", 7000);
+  } catch (e) { toast(esc(e.message), "err", 8000); }
+  await loadState(); render();
+}
 async function copyFrom(key) {
   if (!key || key === P.key) return;
   const d = await call("getProfile", {key});
@@ -1099,6 +1108,7 @@ document.addEventListener("click", async e => {
     case "stopWait": return stopWaiting();
     case "recCat": recCat = v; return render();
     case "cfTab": cfTab = v; return render();
+    case "restoreLauncher": return restoreLauncher();
     case "memApply": return setMemory(memValue());
     case "memRec": memDraft = recMem(); return render();
     case "cfMap": cfMap = !cfMap; return render();
@@ -1269,6 +1279,7 @@ function viewDash() {
         ${S.env.gamePath ? `<button class="btn sm" data-a="folder" data-v="${esc(S.env.gamePath)}">Pasta do jogo</button>` : ""}
         ${S.env.workshopPath ? `<button class="btn sm" data-a="folder" data-v="${esc(S.env.workshopPath)}">Pasta do Workshop</button>` : ""}
         <button class="btn sm" data-a="folder" data-v="${esc(S.env.zomboidPath)}">Pasta Zomboid</button>
+        ${S.env.gamePath ? `<button class="btn ghost sm" data-a="restoreLauncher">Restaurar originais</button>` : ""}
       </div>
     </div>
   </div>`;

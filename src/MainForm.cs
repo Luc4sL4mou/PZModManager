@@ -289,6 +289,9 @@ public sealed class MainForm : Form
             case "zbUninstall":
                 return ZombieBuddy.Uninstall(_paths);
 
+            case "restoreLauncher":
+                return Launcher.RestoreOriginals(_paths);
+
             case "setMemory":
                 return GameMemory.Set(_paths, a["mb"]?.GetValue<int>() ?? 0);
 
