@@ -37,19 +37,24 @@ Mostra quando dois mods ativos mexem na mesma coisa e qual deles vence (o que ca
 ### Project Viewpoint em um clique
 Inscreve no **ZombieBuddy** e no **Project Viewpoint**, instala o ZombieBuddy na pasta do jogo e ativa os dois no perfil escolhido. A aba **Recomendados** lista os addons do Viewpoint mais usados, direto do Workshop.
 
-## Requisitos
-- Windows 10 ou 11 (64 bits)
-- Project Zomboid **Build 42** pela Steam
-- [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) e o WebView2 Runtime (já vem com o Windows 11 e com o Edge)
+## Download
 
-## Como usar
-1. Baixe o código e rode o `build.ps1` (precisa do [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)):
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File build.ps1
-   ```
-   O `PZModManager.exe` aparece na pasta raiz.
-2. Abra o app. Ele encontra sozinho a Steam, o jogo, a pasta do Workshop e a pasta `Zomboid`.
-3. Escolha o perfil no topo (novo jogo, um save ou um servidor) e ative os mods na aba **Mods**.
+<p align="center">
+  <a href="https://github.com/Luc4sL4mou/PZModManager/releases/latest/download/PZModManager-v1.0.0-win-x64.zip"><b>⬇ Baixar PZ Mod Manager (Windows, .zip)</b></a><br>
+  <sub><a href="https://github.com/Luc4sL4mou/PZModManager/releases/latest">ver todas as versões e o SHA-256</a></sub>
+</p>
+
+1. Baixe o `.zip` acima.
+2. Extraia em qualquer pasta (clique com o botão direito → **Extrair tudo**).
+3. Abra o **`PZModManager.exe`**. Não precisa instalar nada.
+
+Ele encontra sozinho a Steam, o jogo, a pasta do Workshop e a pasta `Zomboid`. Depois, escolha o perfil no topo (novo jogo, um save ou um servidor) e ative os mods na aba **Mods**.
+
+> **"O Windows protegeu o computador"?** O app ainda não tem assinatura digital, então o Windows mostra esse aviso na primeira vez que ele é aberto. Clique em **Mais informações → Executar assim mesmo**. O código é aberto, e o SHA-256 de cada versão está na página da Release.
+
+**Requisitos:** Windows 10 ou 11 (64 bits), Project Zomboid **Build 42** pela Steam e o WebView2 Runtime, que já vem no Windows 11 e com o Edge. O .NET já vai dentro do exe.
+
+As configurações e os backups do app ficam na pasta `dados`, ao lado do exe. Para "desinstalar", é só apagar a pasta.
 
 ## O que ele altera no seu PC
 | Arquivo | Quando |
@@ -68,6 +73,13 @@ Inscreve no **ZombieBuddy** e no **Project Viewpoint**, instala o ZombieBuddy na
 ## Segurança
 O projeto passou por um pentest com duas rodadas, e todos os achados foram corrigidos e retestados. O relatório está em [`docs/seguranca/pentest-2026-11-07.md`](docs/seguranca/pentest-2026-11-07.md).
 
+## Para desenvolvedores
+Precisa do [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
+```powershell
+powershell -ExecutionPolicy Bypass -File build.ps1    # exe rápido na raiz (usa o .NET instalado)
+powershell -ExecutionPolicy Bypass -File release.ps1  # zip da Release em release\ (exe com o .NET dentro + SHA-256)
+```
+
 ## Estrutura
 ```
 src/
@@ -76,6 +88,7 @@ src/
   MainForm.cs  janela e ponte entre a interface e o C#
 docs/          imagens do README e relatório de segurança
 build.ps1      compila e copia o exe para a raiz
+release.ps1    gera o zip da Release (exe self-contained + SHA-256)
 ```
 
 ## Créditos
