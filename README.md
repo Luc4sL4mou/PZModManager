@@ -48,7 +48,7 @@ Subscribes to **ZombieBuddy** and **Project Viewpoint**, installs ZombieBuddy in
   <sub><a href="https://github.com/Luc4sL4mou/PZModManager/releases/latest">all versions and SHA-256</a></sub>
 </p>
 
-1. Download the `.zip` above.
+1. Download the `.zip` above (about 43 MB). The green **Code → Download ZIP** button on GitHub gives you the source code, not the app.
 2. Extract it to any folder (right-click → **Extract All**).
 3. Open **`PZModManager.exe`**. Nothing to install.
 
@@ -68,7 +68,7 @@ The app's settings and backups live in the `dados` folder next to the exe. To "u
 | `zbNative.dll`, `ZombieBuddy.jar` (game folder) | When you install ZombieBuddy |
 
 - Before changing any of them, the app saves a copy to `dados\backups\YYYY-MM-DD\`.
-- The **Restaurar originais** (Restore originals) button (Dashboard → Instalação) puts `ProjectZomboid64.json` and `.bat` back to the copy taken before the app's first change. This removes the ZombieBuddy and memory settings.
+- The **Restore originals** button (Dashboard → Installation) puts `ProjectZomboid64.json` and `.bat` back to the copy taken before the app's first change. This removes the ZombieBuddy and memory settings.
 - Files are written to a temporary file first, which then replaces the original, so a crash halfway does not corrupt it.
 - While the game is running, the app does not touch these files.
 - The app does not send any of your data. It only queries the public Steam Workshop API and pages, for titles, images and required items.

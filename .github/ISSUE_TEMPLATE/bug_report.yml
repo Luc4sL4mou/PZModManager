@@ -1,0 +1,61 @@
+name: Bug report / Relatar um problema
+description: Something in PZ Mod Manager didn't work. / Algo no PZ Mod Manager não funcionou.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! You can write in English or Portuguese. / Obrigado! Pode escrever em inglês ou português.
+        PZ Mod Manager is an unofficial tool. Problems with the game itself or with a mod should go to their authors.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened? / O que aconteceu?
+      description: What you did, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / Como reproduzir
+      placeholder: |
+        1. Open the Mods tab
+        2. Enable ...
+        3. ...
+  - type: input
+    id: version
+    attributes:
+      label: App version / Versão do app
+      description: Shown on the Releases page you downloaded from (e.g. v1.2.0).
+      placeholder: v1.2.0
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version / Versão do Windows
+      placeholder: Windows 11 23H2
+  - type: dropdown
+    id: profile
+    attributes:
+      label: Profile in use / Perfil em uso
+      options:
+        - Default (new games)
+        - A save
+        - A server (hosting)
+        - Not related to profiles
+  - type: textarea
+    id: applog
+    attributes:
+      label: App log (dados\log.txt)
+      description: |
+        The last lines of `dados\log.txt`, in the folder where `PZModManager.exe` is. / As últimas linhas do `dados\log.txt`, na pasta do exe.
+        It contains only commands and errors, no personal data, but check before pasting.
+      render: text
+  - type: textarea
+    id: console
+    attributes:
+      label: Game log (only if the game didn't start / só se o jogo não abriu)
+      description: |
+        `%USERPROFILE%\Zomboid\console.txt`. Paste the lines with `ERROR` or `Exception`, or attach the file.
+      render: text

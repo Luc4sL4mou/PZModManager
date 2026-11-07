@@ -48,7 +48,7 @@ Inscreve no **ZombieBuddy** e no **Project Viewpoint**, instala o ZombieBuddy na
   <sub><a href="https://github.com/Luc4sL4mou/PZModManager/releases/latest">ver todas as versões e o SHA-256</a></sub>
 </p>
 
-1. Baixe o `.zip` acima.
+1. Baixe o `.zip` acima (cerca de 43 MB). O botão verde **Code → Download ZIP** do GitHub baixa o código-fonte, não o app.
 2. Extraia em qualquer pasta (clique com o botão direito → **Extrair tudo**).
 3. Abra o **`PZModManager.exe`**. Não precisa instalar nada.
 
