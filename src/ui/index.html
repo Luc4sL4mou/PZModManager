@@ -49,6 +49,11 @@ a:hover{text-decoration:underline}
 select,input[type=text]{background:var(--panel2);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:7px 10px;font:inherit;outline:none}
 select:focus,input[type=text]:focus{border-color:var(--accent)}
 select{min-width:230px;cursor:pointer}
+.langsw{display:flex;background:var(--panel2);border:1px solid var(--border2);border-radius:20px;padding:2px;gap:2px}
+.langsw button{all:unset;cursor:pointer;padding:3px 10px;border-radius:16px;font-size:12px;font-weight:650;color:var(--muted);letter-spacing:.3px}
+.langsw button:hover{color:var(--text)}
+.langsw button.on{background:var(--accent);color:#fff}
+.langsw button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .savechip{font-size:12px;color:var(--muted);min-width:90px;text-align:right}
 .savechip.ok{color:var(--ok)}
 .content{flex:1;min-height:0;overflow:auto;padding:22px 26px 90px}
@@ -320,6 +325,7 @@ input[type=range].mem:disabled{opacity:.5;cursor:not-allowed}
       <h1 id="title">Painel</h1>
       <div class="sp"></div>
       <span class="savechip" id="savechip"></span>
+      <div class="langsw" role="group" aria-label="Language / Idioma"><button data-a="lang" data-v="en" title="English">EN</button><button data-a="lang" data-v="pt" title="Português">PT</button></div>
       <div class="profile">Perfil de mods <select id="profileSel" title="Onde os mods serão ativados"></select></div>
       <button class="btn ghost sm" id="refreshBtn" title="Recarregar e buscar atualizações no Workshop">⟳</button>
     </header>
@@ -332,6 +338,303 @@ input[type=range].mem:disabled{opacity:.5;cursor:not-allowed}
 
 <script>
 "use strict";
+/* ---------- idioma: inglês é o padrão; o texto original do código é português ----------
+ * A interface é escrita em pt-BR. Em inglês, um tradutor troca os textos da tela (e os que aparecem depois:
+ * toasts, pop-ups, re-renderizações) usando o dicionário TR. Chaves com {} são padrões; {0},{1}… no valor.
+ * Valores capturados que também são chaves exatas (ex.: "Esperado") são traduzidos junto. */
+const LANG = (() => { try { return JSON.parse(localStorage.getItem("pzmm.lang")) || "en"; } catch { return "en"; } })();
+const EN_ON = LANG === "en", LOC = EN_ON ? "en-US" : "pt-BR";
+const L = (pt, en) => EN_ON ? en : pt;
+document.documentElement.lang = EN_ON ? "en" : "pt-BR";
+const TR = {
+  // navegação e topo
+  "Painel": "Dashboard", "Mods": "Mods", "Conflitos": "Conflicts", "Recomendados": "Recommended", "Servidores": "Servers",
+  "Perfil de mods": "Mod profile", "Onde os mods serão ativados": "Where mods will be enabled",
+  "Recarregar e buscar atualizações no Workshop": "Reload and check the Workshop for updates",
+  "Jogo": "Game", "aberta": "open", "fechada": "closed", "Mods ativos": "Active mods", "▶ Jogar": "▶ Play", "Jogo aberto": "Game running",
+  "não encontrado": "not found", "Salvando…": "Saving…", "✓ Salvo": "✓ Saved", "Carregando…": "Loading…", "Erro ao iniciar": "Startup error",
+  "Padrão (novos jogos)": "Default (new games)", "Servidores (hospedar)": "Servers (hosting)",
+  // painel: Viewpoint
+  "Project Viewpoint pronto para jogar": "Project Viewpoint ready to play", "Configurar o Project Viewpoint": "Set up Project Viewpoint",
+  "ZombieBuddy instalado e Viewpoint ativo. Veja os addons recomendados para completar a experiência.": "ZombieBuddy installed and Viewpoint enabled. Check the recommended addons to complete the experience.",
+  "Um clique faz tudo: abre a Steam para você se inscrever, instala o ZombieBuddy no jogo e ativa os mods no perfil escolhido.": "One click does it all: opens Steam so you can subscribe, installs ZombieBuddy in the game and enables the mods in the chosen profile.",
+  "Inscrever no ZombieBuddy": "Subscribe to ZombieBuddy", "Carregador Java exigido pelo Viewpoint": "Java loader required by Viewpoint",
+  "Instalar o ZombieBuddy no jogo": "Install ZombieBuddy in the game", "Reparar o ZombieBuddy no jogo": "Repair ZombieBuddy in the game",
+  "Atualizar o ZombieBuddy no jogo": "Update ZombieBuddy in the game", "Copia 2 arquivos e configura o lançador": "Copies 2 files and configures the launcher",
+  "Inscrever no Project Viewpoint": "Subscribe to Project Viewpoint", "Primeira e terceira pessoa em 3D": "First and third person in 3D",
+  "Ativar no perfil atual": "Enable in the current profile", "Addons essenciais (opcional)": "Essential addons (optional)",
+  "{} de {} inscritos": "{0} of {1} subscribed", "Correções e modelos 3D recomendados": "Recommended fixes and 3D models",
+  "Ver": "View", "Inscrever": "Subscribe", "Instalar": "Install", "Reparar": "Repair", "Atualizar": "Update", "Ativar": "Enable", "Desativar": "Disable",
+  "Configurar tudo": "Set up everything", "Configurando…": "Setting up…", "Aguarde…": "Please wait…",
+  // painel: ZombieBuddy
+  "Inscrito no Workshop": "Subscribed on the Workshop", "Inscrito no Workshop (v{})": "Subscribed on the Workshop (v{0})",
+  "zbNative.dll e ZombieBuddy.jar na pasta do jogo": "zbNative.dll and ZombieBuddy.jar in the game folder",
+  "Lançador configurado (-agentlib:zbNative)": "Launcher configured (-agentlib:zbNative)",
+  "Lançador configurado (-agentlib:zbNative) · também nas opções da Steam": "Launcher configured (-agentlib:zbNative) · also in Steam launch options",
+  "Atualização pendente: aplicada ao abrir o jogo": "Update pending: applied when the game starts",
+  "Versão do jogo igual à do Workshop": "Game copy matches the Workshop version",
+  "Inscrever no Workshop": "Subscribe on the Workshop", "Remover": "Remove", "Página no Workshop": "Workshop page",
+  "Mods Java têm acesso total ao PC. O ZombieBuddy pergunta antes de carregar cada um; o app mantém essa proteção ligada.": "Java mods have full access to your PC. ZombieBuddy asks before loading each one, and the app keeps that protection on.",
+  "Ver aprovações salvas": "View saved approvals",
+  "Project Zomboid não encontrado.": "Project Zomboid not found.",
+  "Inscreva-se no ZombieBuddy no Workshop para começar.": "Subscribe to ZombieBuddy on the Workshop to get started.",
+  "Baixado, mas ainda não instalado no jogo.": "Downloaded, but not installed in the game yet.",
+  "Inscreva-se no ZombieBuddy no Workshop.": "Subscribe to ZombieBuddy on the Workshop.",
+  "A configuração do lançador sumiu (geralmente após uma atualização do jogo). Clique em Reparar.": "The launcher setting is gone (usually after a game update). Click Repair.",
+  "Arquivos do ZombieBuddy faltando na pasta do jogo. Clique em Reparar.": "ZombieBuddy files are missing from the game folder. Click Repair.",
+  "Há uma versão mais nova do ZombieBuddy baixada pelo Workshop.": "A newer ZombieBuddy version was downloaded by the Workshop.",
+  "ZombieBuddy instalado e ativo.": "ZombieBuddy installed and active.",
+  // painel: perfil e instalação
+  "Perfil: {}": "Profile: {0}", "Configuração de servidor (Hospedar)": "Server configuration (Host)", "Mods deste save": "Mods for this save",
+  "Mods usados ao criar um jogo novo": "Mods used when creating a new game",
+  "ativos": "enabled", "problemas": "problems", "avisos": "warnings", "com atualização": "with updates",
+  "Gerenciar mods": "Manage mods", "Corrigir automaticamente": "Fix automatically", "Downloads da Steam": "Steam downloads",
+  "A Steam atualiza sozinha os mods inscritos (inclusive o ZombieBuddy). Este app vigia a pasta do Workshop, avisa quando algo muda e reaplica a configuração do ZombieBuddy se uma atualização do jogo a apagar.": "Steam updates subscribed mods on its own (ZombieBuddy included). This app watches the Workshop folder, warns you when something changes and reapplies the ZombieBuddy setup if a game update wipes it.",
+  "Instalação": "Installation", "Detectado automaticamente": "Detected automatically", "Versão": "Version", "Dados": "Data",
+  "Pasta do jogo": "Game folder", "Pasta do Workshop": "Workshop folder", "Pasta Zomboid": "Zomboid folder",
+  "Restaurar originais": "Restore originals", "Restaurar": "Restore", "Cancelar": "Cancel", "Fechar": "Close", "Sim": "Yes",
+  "Isto volta ProjectZomboid64.json e ProjectZomboid64.bat (o lançador do jogo) para a cópia de antes da primeira alteração feita por este app.": "This puts ProjectZomboid64.json and ProjectZomboid64.bat (the game launcher) back to the copy from before this app's first change.",
+  "A configuração do ZombieBuddy (-agentlib:zbNative) e a memória do jogo (-Xmx) voltam ao padrão: mods Java como o Viewpoint deixam de carregar até você reinstalar o ZombieBuddy pelo app.": "The ZombieBuddy setting (-agentlib:zbNative) and the game memory (-Xmx) go back to default: Java mods such as Viewpoint stop loading until you reinstall ZombieBuddy from the app.",
+  "Se o jogo foi atualizado depois disso e não abrir, use \"Verificar integridade dos arquivos\" na Steam.": "If the game was updated after that and won't start, use \"Verify integrity of game files\" in Steam.",
+  "Lançador do jogo:": "Game launcher:", "{}: restaurado da cópia de {}": "{0}: restored from the {1} copy", "{}: já era o original": "{0}: already the original",
+  "Não há cópia dos arquivos originais do lançador (o app ainda não os alterou). Se precisar, use \"Verificar integridade dos arquivos\" do jogo na Steam.": "There is no copy of the original launcher files (the app hasn't changed them yet). If needed, use \"Verify integrity of game files\" in Steam.",
+  "Feche o Project Zomboid antes de restaurar os arquivos originais.": "Close Project Zomboid before restoring the original files.",
+  // memória
+  "Memória do jogo": "Game memory", "Memória do jogo:": "Game memory:", "Memória (RAM) do jogo": "Game memory (RAM)",
+  "Quanto da RAM ({}) o Project Zomboid pode usar. {}: pedem cerca de": "How much of your RAM ({0}) Project Zomboid can use. {1}: they need about",
+  "configurado hoje:": "currently set:", "Insuficiente": "Insufficient", "Apertado": "Tight", "Sobra pouca RAM": "Little RAM left", "Além do necessário": "More than needed", "Bom": "Good",
+  "Alto risco de o jogo fechar ou travar ao carregar o mundo (falta de memória, como aconteceu com 3 GB).": "High risk of the game closing or freezing while loading the world (out of memory, like with 3 GB).",
+  "Deve abrir, mas pode engasgar e travar em áreas grandes ou depois de jogar por muito tempo.": "It should start, but it may stutter and freeze in large areas or after long sessions.",
+  "Ficam só {} para o Windows, a Steam, o navegador e a parte do jogo fora do Java: o PC pode ficar lento.": "Only {0} is left for Windows, Steam, your browser and the part of the game outside Java: the PC may slow down.",
+  "Funciona, mas não deixa o jogo mais rápido: só tira memória do resto do PC.": "Works, but doesn't make the game faster: it only takes memory from the rest of the PC.",
+  "Suficiente para os mods ativos e ainda sobram {} para o resto do PC.": "Enough for the enabled mods, with {0} left for the rest of the PC.",
+  "recomendado": "recommended", "máx.": "max.", "Aplicar": "Apply", "Aplicar {}": "Apply {0}", "Usar recomendado ({})": "Use recommended ({0})", "Usar {}": "Use {0}",
+  "Feche o jogo para aplicar": "Close the game to apply", "Hoje está em {}, acima do limite seguro ({})": "Currently {0}, above the safe limit ({1})",
+  "O jogo ainda está no padrão de 3 GB": "The game is still on the 3 GB default",
+  "Vale na próxima vez que o jogo abrir. Uma atualização do jogo pode voltar para 3 GB: se isso acontecer, o app avisa aqui.": "Takes effect the next time the game starts. A game update may reset it to 3 GB: if that happens, the app warns you here.",
+  "Este PC tem {} de RAM: não dá para dar mais memória ao jogo com segurança, porque o Windows precisa de pelo menos 4 GB.": "This PC has {0} of RAM: the game can't safely get more memory, because Windows needs at least 4 GB.",
+  "Se o jogo travar ao carregar o mundo, desative mapas grandes e mods Java (aba Mods).": "If the game freezes while loading the world, disable large maps and Java mods (Mods tab).",
+  "Este PC tem {} de RAM: não dá para dar mais memória ao jogo com segurança, porque o Windows precisa de pelo menos 4 GB. Se o jogo travar ao carregar o mundo, desative mapas grandes e mods Java (aba Mods).": "This PC has {0} of RAM: the game can't safely get more memory, because Windows needs at least 4 GB. If the game freezes while loading the world, disable large maps and Java mods (Mods tab).",
+  "{} GB, {}": "{0} GB, {1}", ". Vale na próxima vez que abrir o jogo.": ". Takes effect the next time you start the game.",
+  "O Project Zomboid vem limitado a": "Project Zomboid ships limited to", "3 GB de RAM": "3 GB of RAM",
+  ". Com muitos mods, mapas grandes ou mods Java (como o Viewpoint), isso costuma faltar: o jogo trava ou fecha sozinho ao carregar o mundo, com o erro": ". With many mods, large maps or Java mods (like Viewpoint), that is often not enough: the game freezes or closes while loading the world, with the error",
+  "Agora dá para ajustar isso aqui no app, no card": "You can now adjust it right here in the app, in the",
+  "do Painel: arraste a barra, veja se o valor fica bom para os seus mods e clique em": "card on the Dashboard: drag the bar, check that the value is good for your mods and click",
+  "Hoje:": "Currently:", "· recomendado para os seus mods:": "· recommended for your mods:", "Não exibir novamente": "Don't show again", "Ajustar agora": "Adjust now",
+  "Ilustração da barra de memória": "Memory bar illustration",
+  "O jogo só pode usar {} GB de memória. Com {} mods (mapas/Java), ele costuma fechar ou travar ao carregar o mundo (OutOfMemoryError).": "The game can only use {0} GB of memory. With {1} mods (maps/Java), it often closes or freezes while loading the world (OutOfMemoryError).",
+  // aba Mods
+  "Sugestões": "Suggestions", "{} problema(s)": "{0} problem(s)", "{} aviso(s)": "{0} warning(s)", "Erro": "Error", "Aviso": "Warning", "Dica": "Tip",
+  "Buscar por nome, ID ou item…": "Search by name, ID or item…", "Todos": "All", "Ativos": "Enabled", "Inativos": "Disabled", "Com problema": "With problems", "Obsoletos": "Obsolete",
+  "Copiar lista de…": "Copy list from…", "Desativar todos": "Disable all", "Nenhum mod aqui": "No mods here", "Ajuste a busca ou o filtro.": "Adjust the search or the filter.",
+  "Nenhum mod instalado ainda": "No mods installed yet",
+  "Inscreva-se em mods no Workshop (ou use a aba Recomendados) e eles aparecem aqui sozinhos.": "Subscribe to mods on the Workshop (or use the Recommended tab) and they show up here on their own.",
+  "não instalado": "not installed", "{} erro": "{0} error", "{} erros": "{0} errors", "{} aviso": "{0} warning", "{} avisos": "{0} warnings",
+  "atualização": "update", "mapa": "map", "só B41?": "B41 only?", "obsoleto": "obsolete", "vai ficar obsoleto?": "may become obsolete?", "Pode ficar obsoleto em breve": "May become obsolete soon",
+  "Este ID está na lista de mods ativos, mas nenhum mod instalado usa esse ID.": "This ID is in the active mods list, but no installed mod uses it.",
+  "Remover da lista": "Remove from list", "Precisa de": "Requires", "Usado por": "Used by", "Incompatível com": "Incompatible with", "Carrega depois de": "Loads after",
+  "Mapas": "Maps", "Pasta": "Folder", "Autor": "Author", "Abrir pasta": "Open folder", "{} (falta)": "{0} (missing)", "{} (não inscrito)": "{0} (not subscribed)",
+  "\"{}\" está na lista, mas não está instalado.": "\"{0}\" is in the list, but isn't installed.",
+  "Precisa de \"{}\", que está desativado.": "Requires \"{0}\", which is disabled.",
+  "Precisa do mod \"{}\", que não está instalado.": "Requires the mod \"{0}\", which isn't installed.",
+  "Precisa do item \"{}\" do Workshop (não inscrito).": "Requires the Workshop item \"{0}\" (not subscribed).",
+  "Incompatível com \"{}\".": "Incompatible with \"{0}\".", "Procurar no Workshop": "Search the Workshop", "Desativar {}": "Disable {0}",
+  "Não tem pasta para o Build 42: provavelmente é só para o B41 e o jogo vai ignorá-lo.": "Has no Build 42 folder: it's probably B41-only and the game will ignore it.",
+  "Exige o jogo na versão {} ou mais nova (você tem {}).": "Requires game version {0} or newer (you have {1}).",
+  "Feito para até a versão {} (você tem {}): obsoleto para esta versão.": "Made for up to version {0} (you have {1}): obsolete for this version.",
+  "Não está mais disponível no Workshop (removido ou oculto).": "No longer available on the Workshop (removed or hidden).",
+  "Marcado pelo autor como obsoleto/descontinuado (no nome ou na descrição). Veja a página: talvez outro mod o substitua.": "Marked by the author as obsolete/discontinued (in the name or description). Check its page: another mod may replace it.",
+  "Feito para até a versão {}: deve parar de funcionar na próxima atualização do jogo.": "Made for up to version {0}: it will likely stop working with the next game update.",
+  "Sem atualização há mais de 1 ano ({}): pode estar abandonado e quebrar numa atualização do jogo.": "Not updated for over a year ({0}): it may be abandoned and break with a game update.",
+  "Há atualização no Workshop. A Steam baixa sozinha; se demorar, abra os downloads da Steam.": "There's an update on the Workshop. Steam downloads it on its own; if it takes long, open Steam downloads.",
+  "Este ID existe em {} lugares (Workshop/local). O jogo usa só um.": "This ID exists in {0} places (Workshop/local). The game uses only one.",
+  "\"{}\" precisa do ZombieBuddy instalado no jogo. {}": "\"{0}\" needs ZombieBuddy installed in the game. {1}",
+  "{} mods precisam do ZombieBuddy instalado no jogo. {}": "{0} mods need ZombieBuddy installed in the game. {1}",
+  "Instalar ZombieBuddy": "Install ZombieBuddy", "Reparar ZombieBuddy": "Repair ZombieBuddy",
+  "Pode conflitar com \"{}\": os dois alteram {} ponto(s) (ex.: {}). Vale o de \"{}\", que carrega por último.": "May conflict with \"{0}\": both change {1} point(s) (e.g. {2}). \"{3}\" wins because it loads last.",
+  "{} par(es) de mods ativos alteram os mesmos pontos (o último a carregar vence).": "{0} pair(s) of enabled mods change the same points (the last one to load wins).",
+  "Ver mapa de conflitos": "View conflict map",
+  "A ordem de carregamento pode ser ajustada para respeitar dependências.": "The load order can be adjusted to respect dependencies.", "Ajustar ordem": "Adjust order",
+  // avisos e pop-ups
+  "Ativado": "Enabled", "+ dependências: {}": "+ dependencies: {0}", "Faltam mods necessários: {}. Veja a aba Mods.": "Required mods are missing: {0}. See the Mods tab.",
+  "Mods incompatíveis": "Incompatible mods", "\"{}\" é incompatível com:": "\"{0}\" is incompatible with:", "Desativar esses e continuar?": "Disable those and continue?", "Desativar e continuar": "Disable and continue",
+  "Outros mods precisam deste": "Other mods need this one", "Estes mods precisam de \"{}\":": "These mods need \"{0}\":", "Desativar todos?": "Disable all of them?",
+  "Este item não tem mods reconhecidos.": "This item has no recognized mods.", "\"{}\" tem {} mods. Escolha quais ativar.": "\"{0}\" has {1} mods. Choose which to enable.",
+  "Você já está inscrito em tudo isso.": "You're already subscribed to all of these.", "✓ Inscrito em": "✓ Subscribed to",
+  "baixado e ativado.": "downloaded and enabled.", "baixado. Ele tem {} mods: escolha na aba Mods.": "downloaded. It has {0} mods: choose them in the Mods tab.",
+  "O jogo está aberto: as mudanças valem quando você reiniciar o jogo (ou recarregar o save).": "The game is running: changes take effect when you restart the game (or reload the save).",
+  "Erro ao salvar: {}": "Error saving: {0}", "Não foi possível consultar o Workshop: {}": "Couldn't reach the Workshop: {0}",
+  "Não foi possível varrer os conflitos: {}": "Couldn't scan for conflicts: {0}", "Não foi possível carregar os recomendados: {}": "Couldn't load the recommendations: {0}",
+  "Falha ao instalar o ZombieBuddy: {}": "Failed to install ZombieBuddy: {0}", "Feche o Project Zomboid para instalar o ZombieBuddy.": "Close Project Zomboid to install ZombieBuddy.",
+  "Feche o jogo para instalar o ZombieBuddy.": "Close the game to install ZombieBuddy.", "ZombieBuddy instalado:": "ZombieBuddy installed:",
+  "Copiado {} para a pasta do jogo": "Copied {0} to the game folder", "Removida atualização pendente antiga (ZombieBuddy.jar.new)": "Removed an old pending update (ZombieBuddy.jar.new)",
+  "Adicionado -agentlib:zbNative ao ProjectZomboid64.json": "Added -agentlib:zbNative to ProjectZomboid64.json", "Adicionado -agentlib:zbNative ao ProjectZomboid64.bat": "Added -agentlib:zbNative to ProjectZomboid64.bat",
+  "Removido -agentlib:zbNative do ProjectZomboid64.json": "Removed -agentlib:zbNative from ProjectZomboid64.json", "Removido -agentlib:zbNative do ProjectZomboid64.bat": "Removed -agentlib:zbNative from ProjectZomboid64.bat",
+  "Nada a fazer: já estava tudo certo.": "Nothing to do: everything was already set.", "Apagado {}": "Deleted {0}", "O ZombieBuddy não estava instalado.": "ZombieBuddy wasn't installed.",
+  "Atenção: as Opções de inicialização da Steam ainda têm -agentlib:zbNative. Remova manualmente em Propriedades do jogo.": "Note: Steam launch options still contain -agentlib:zbNative. Remove it manually in the game's Properties.",
+  "Pasta do jogo não encontrada.": "Game folder not found.", "Feche o Project Zomboid antes de mudar a memória.": "Close Project Zomboid before changing the memory.",
+  "Valor fora do permitido (2048 a {} MB).": "Value out of range (2048 to {0} MB).",
+  "Não encontrei a configuração de memória (-Xmx) no lançador do jogo (ProjectZomboid64.json/.bat). Uma atualização do jogo pode ter mudado o formato; verifique os arquivos do jogo na Steam.": "Couldn't find the memory setting (-Xmx) in the game launcher (ProjectZomboid64.json/.bat). A game update may have changed the format; verify the game files in Steam.",
+  "Feche o Project Zomboid antes de instalar o ZombieBuddy.": "Close Project Zomboid before installing ZombieBuddy.",
+  "O ZombieBuddy ainda não foi baixado pelo Workshop. Inscreva-se primeiro.": "ZombieBuddy hasn't been downloaded from the Workshop yet. Subscribe first.",
+  "Arquivo {} não encontrado no item do Workshop.": "File {0} not found in the Workshop item.",
+  "Feche o Project Zomboid antes de remover o ZombieBuddy.": "Close Project Zomboid before removing ZombieBuddy.",
+  "Feche o Project Zomboid antes de mexer no ZombieBuddy.": "Close Project Zomboid before changing ZombieBuddy.",
+  "Perfil não encontrado.": "Profile not found.", "Pasta fora das pastas do jogo.": "Folder outside the game folders.", "Comando desconhecido: {}": "Unknown command: {0}",
+  "Nome inválido: \"{}\".": "Invalid name: \"{0}\".", "ID do Workshop inválido: \"{}\".": "Invalid Workshop ID: \"{0}\".",
+  "A operação \"{}\" demorou demais. Talvez o antivírus esteja verificando arquivos do jogo; tente de novo em instantes.": "The operation \"{0}\" took too long. Your antivirus may be scanning game files; try again in a moment.",
+  "Corrigido: {} item(ns); {} para inscrever. Incompatibilidades ficam para você decidir.": "Fixed: {0} item(s); {1} to subscribe. Incompatibilities are left for you to decide.",
+  "Corrigido: {} item(ns). Incompatibilidades ficam para você decidir.": "Fixed: {0} item(s). Incompatibilities are left for you to decide.",
+  "Nada para corrigir automaticamente.": "Nothing to fix automatically.",
+  "Remover ZombieBuddy": "Remove ZombieBuddy",
+  "Isto apaga zbNative.dll e ZombieBuddy.jar da pasta do jogo e tira o -agentlib:zbNative do lançador.": "This deletes zbNative.dll and ZombieBuddy.jar from the game folder and removes -agentlib:zbNative from the launcher.",
+  "Mods Java (como o Viewpoint) deixam de funcionar.": "Java mods (like Viewpoint) will stop working.",
+  "Copiar lista de mods": "Copy mod list", "Substituir os {} mods de \"{}\" pelos {} de \"{}\"?": "Replace the {0} mods of \"{1}\" with the {2} from \"{3}\"?", "Copiar": "Copy",
+  "Desativar os {} mods de \"{}\"?": "Disable the {0} mods of \"{1}\"?",
+  "Agora": "Now", "carrega depois de": "loads after", "e vence onde os dois se cruzam.": "and wins where the two overlap.",
+  "A configuração do ZombieBuddy sumiu (provavelmente uma atualização do jogo). Clique em": "The ZombieBuddy setup is gone (probably a game update). Click", "no Painel.": "on the Dashboard.",
+  "Tudo pronto!": "All set!", "ZombieBuddy e Project Viewpoint estão instalados e ativos no perfil": "ZombieBuddy and Project Viewpoint are installed and enabled in the profile",
+  "Ao abrir o jogo:": "When you start the game:", "O ZombieBuddy vai perguntar se pode carregar o Java do Viewpoint: clique em": "ZombieBuddy will ask whether it may load Viewpoint's Java: click",
+  "e depois em": "and then", "salvar a decisão": "save the decision",
+  "No menu principal, o texto \"ZombieBuddy … loaded\" no canto superior esquerdo confirma que funcionou.": "On the main menu, the text \"ZombieBuddy … loaded\" in the top-left corner confirms it worked.",
+  "Dentro do jogo:": "In game:", "liga a primeira pessoa e": "toggles first person and", "abre as opções do Viewpoint.": "opens the Viewpoint options.",
+  "Quer ver os addons recomendados?": "Want to see the recommended addons?", "Ver recomendados": "View recommended",
+  // fila de inscrição / Steam
+  "Inscrição {} de {}: {}": "Subscription {0} of {1}: {2}", "Na página que abriu na Steam, clique em": "On the page that opened in Steam, click", "Inscrever-se": "Subscribe",
+  ". Assim que a Steam registrar, eu sigo sozinho.": ". As soon as Steam registers it, I'll continue on my own.", "Abrir de novo": "Open again", "Pular": "Skip",
+  "Aguardando a Steam baixar \"{}\"": "Waiting for Steam to download \"{0}\"", "Aguardando a Steam baixar {} mods": "Waiting for Steam to download {0} mods",
+  "Quando chegar, ativo sozinho em": "When it arrives, I'll enable it in", "Parar de esperar": "Stop waiting",
+  "Aguardando inscrição": "Waiting for subscription", "A Steam ainda não registrou a inscrição. Na página que abriu, clique em": "Steam hasn't registered the subscription yet. On the page that opened, click",
+  "Baixando…": "Downloading…", "A Steam está baixando agora.": "Steam is downloading it now.", "Download pausado": "Download paused", "O download está": "The download is", "pausado": "paused",
+  "na Steam. Abra os Downloads e retome.": "in Steam. Open Downloads and resume it.", "Na fila da Steam": "In the Steam queue",
+  "A Steam baixa um item por vez e está ocupada com": "Steam downloads one item at a time and is busy with", ". Em Downloads, clique na seta": ". In Downloads, click the arrow",
+  "do Project Zomboid para baixar primeiro.": "next to Project Zomboid to download it first.", "Está na fila de downloads da Steam.": "It's in the Steam download queue.",
+  "Esperando a Steam": "Waiting for Steam", "Inscrição registrada. A Steam deve começar o download em instantes (às vezes só ao abrir o jogo).": "Subscription registered. Steam should start the download shortly (sometimes only when the game starts).",
+  // conflitos
+  "Nenhum mod ativo": "No enabled mods", "Ative mods em": "Enable mods in", "para ver onde eles se cruzam.": "to see where they overlap.",
+  "verificando scripts e mapas…": "checking scripts and maps…", "Verificando…": "Checking…", "Nenhum conflito": "No conflicts",
+  "Os {} mods ativos não mexem nas mesmas coisas.": "The {0} enabled mods don't touch the same things.",
+  "{} conflito precisa da sua atenção": "{0} conflict needs your attention", "{} conflitos precisam da sua atenção": "{0} conflicts need your attention", "Nada sério": "Nothing serious",
+  "Quando dois mods mexem na mesma coisa, vale o que carrega por último. Em cada caso você pode escolher quem vence, desativar um deles ou ignorar o alerta.": "When two mods change the same thing, the one that loads last wins. In each case you can choose who wins, disable one of them or ignore the alert.",
+  "Mapa visual": "Visual map", "Esconder mapa": "Hide map", "Precisam de atenção": "Need attention", "Esperados": "Expected", "Ignorados": "Ignored", "Nada aqui": "Nothing here",
+  "Incompatível": "Incompatible", "Atenção": "Attention", "Só visual": "Visual only", "Esperado": "Expected",
+  "Ignorar": "Ignore", "Voltar a mostrar": "Show again", "Já sei, não mostrar mais como alerta": "Got it, stop showing this as an alert", "Voltar a mostrar em Precisam de atenção": "Show again under Need attention",
+  "Vence:": "Wins:", "(#{}, carrega por último).": "(#{0}, loads last).", "Fazer {} vencer": "Make {0} win", "Carregar {} depois de {}": "Load {0} after {1}",
+  "Ver os {} ponto(s) ▾": "View the {0} point(s) ▾", "Ocultar detalhes ▴": "Hide details ▴", "célula {}": "cell {0}", "Maiores cruzamentos": "Biggest overlaps",
+  "O autor diz que estes mods não funcionam juntos: pode dar erro, travar ou corromper o save.": "The author says these mods don't work together: it may cause errors, freezes or a corrupted save.",
+  "Um arquivo de código de {} é trocado pelo de {} ({}). Parte do que {} faz pode parar de funcionar.": "One code file from {0} is replaced by {1}'s ({2}). Part of what {3} does may stop working.",
+  "{} arquivos de código de {} são trocados pelo de {} ({}). Parte do que {} faz pode parar de funcionar.": "{0} code files from {1} are replaced by {2}'s ({3}). Part of what {4} does may stop working.",
+  "Um item existe nos dois ({}): fica a versão de {} (peso, dano, aparência, receitas).": "One item exists in both ({0}): {1}'s version is kept (weight, damage, look, recipes).",
+  "{} itens existem nos dois ({}): fica a versão de {} (peso, dano, aparência, receitas).": "{0} items exist in both ({1}): {2}'s version is kept (weight, damage, look, recipes).",
+  "Um veículo existe nos dois ({}): fica a versão de {}.": "One vehicle exists in both ({0}): {1}'s version is kept.",
+  "{} veículos existem nos dois ({}): fica a versão de {}.": "{0} vehicles exist in both ({1}): {2}'s version is kept.",
+  "Uma receita/conserto existe nos dois ({}): só a de {} vale.": "One recipe/fix exists in both ({0}): only {1}'s counts.",
+  "{} receitas/consertos existem nos dois ({}): só a de {} vale.": "{0} recipes/fixes exist in both ({1}): only {2}'s count.",
+  "Um modelo 3D/som existe nos dois: a aparência de {} substitui a de {}. Normalmente não quebra nada.": "One 3D model/sound exists in both: {0}'s look replaces {1}'s. This usually doesn't break anything.",
+  "{} modelos 3D/sons existem nos dois: a aparência de {} substitui a de {}. Normalmente não quebra nada.": "{0} 3D models/sounds exist in both: {1}'s look replaces {2}'s. This usually doesn't break anything.",
+  "{} definição(ões) de script em comum ({}): vale a de {}.": "{0} script definition(s) in common ({1}): {2}'s wins.",
+  "Um arquivo de script de {} é trocado pelo de {} ({}).": "One script file from {0} is replaced by {1}'s ({2}).",
+  "{} arquivos de script de {} são trocados pelo de {} ({}).": "{0} script files from {1} are replaced by {2}'s ({3}).",
+  "Os dois mapas ocupam a mesma célula do mundo: ali a construção de {} cobre a de {} (prédios cortados ou sobrepostos).": "Both maps use the same world cell: there, {0}'s buildings cover {1}'s (cut or overlapping buildings).",
+  "Os dois mapas ocupam {} células iguais do mundo: ali a construção de {} cobre a de {} (prédios cortados ou sobrepostos).": "Both maps use {0} identical world cells: there, {1}'s buildings cover {2}'s (cut or overlapping buildings).",
+  "{} depende de {}: a sobreposição é proposital.": "{0} depends on {1}: the overlap is intentional.",
+  "{} parece ser um patch/correção do outro: a sobreposição é proposital.": "{0} looks like a patch/fix for the other one: the overlap is intentional.",
+  "Os autores já definiram esta ordem de carregamento: a sobreposição é proposital.": "The authors already defined this load order: the overlap is intentional.",
+  "{} declara incompatibilidade com {}": "{0} declares incompatibility with {1}",
+  "Arquivos (lua/scripts)": "Files (lua/scripts)", "Objetos de script (itens, veículos, receitas…)": "Script objects (items, vehicles, recipes…)", "Células de mapa": "Map cells", "Incompatibilidade declarada": "Declared incompatibility",
+  "{} × {}: {}. Clique para ver.": "{0} × {1}: {2}. Click to view.", "{} × {}: {} (ignorado). Clique para ver.": "{0} × {1}: {2} (ignored). Click to view.",
+  // recomendados
+  "Buscando addons do Viewpoint no Workshop…": "Fetching Viewpoint addons from the Workshop…", "Base": "Core", "Obrigatórios para o Viewpoint funcionar": "Required for Viewpoint to work",
+  "Essenciais": "Essentials", "Correções e modelos 3D que quase todo mundo usa": "Fixes and 3D models almost everyone uses",
+  "Inscrever e ativar os {} que faltam": "Subscribe and enable the {0} missing", "Todos inscritos": "All subscribed", "Populares da comunidade": "Community favorites",
+  "Addons que dependem do Viewpoint, por número de inscritos": "Addons that depend on Viewpoint, by subscriber count", "⟳ Atualizar": "⟳ Refresh",
+  "Inscrito": "Subscribed", "Obsoleto": "Obsolete", "Abrir os Downloads da Steam": "Open Steam downloads", "Inscrever e ativar": "Subscribe and enable",
+  "Clique para desativar": "Click to disable", "✓ Ativo": "✓ Enabled",
+  "A lista \"Populares\" vem ao vivo do Workshop. Itens marcados como": "The \"Community favorites\" list comes live from the Workshop. Items marked",
+  "dizem no título que não são mais necessários nas versões novas do Viewpoint. Os addons são da comunidade: confira a página de cada um antes de usar em servidor.": "say in their title that they're no longer needed in newer Viewpoint versions. Addons are community-made: check each page before using them on a server.",
+  "Obrigatório. Carregador Java que o Viewpoint usa.": "Required. The Java loader Viewpoint uses.", "O mod principal: primeira e terceira pessoa com motor gráfico 3D.": "The main mod: first and third person with a 3D graphics engine.",
+  "Pacote oficial de modelos 3D para móveis e objetos (indicado na página do Viewpoint).": "Official 3D model pack for furniture and objects (linked on the Viewpoint page).",
+  "Corrige superfícies (mesas, balcões) em 3D.": "Fixes surfaces (tables, counters) in 3D.", "Corrige portas em 3D.": "Fixes doors in 3D.", "Corrige luzes e lâmpadas.": "Fixes lights and lamps.",
+  "Corrige barricadas em 3D.": "Fixes barricades in 3D.", "Melhorias de qualidade de vida para jogar em primeira pessoa.": "Quality-of-life improvements for playing in first person.",
+  "Interface adaptada à primeira pessoa.": "UI adapted to first person.",
+  // servidores
+  "Entrar no servidor de outra pessoa": "Join someone else's server", "O jogo baixa sozinho os mods do servidor ao conectar.": "The game downloads the server's mods on its own when you connect.",
+  "ZombieBuddy instalado: pronto para servidores com Viewpoint": "ZombieBuddy installed: ready for servers with Viewpoint",
+  "Se o servidor usa Viewpoint, instale o ZombieBuddy no Painel antes": "If the server uses Viewpoint, install ZombieBuddy from the Dashboard first",
+  "Steam aberta": "Steam open", "Steam fechada (precisa estar aberta para baixar os mods)": "Steam closed (it must be open to download mods)",
+  "Na primeira conexão, o ZombieBuddy pode pedir aprovação para carregar o Java do Viewpoint. Clique em": "On the first connection, ZombieBuddy may ask for approval to load Viewpoint's Java. Click",
+  "Hospedar o seu servidor": "Host your own server", "Configurações criadas em": "Settings created under", "Hospedar": "Host", "no menu do jogo aparecem aqui.": "in the game menu show up here.",
+  "Ao editar um servidor, o app atualiza juntos": "When you edit a server, the app updates together", "e os mapas de mods em": "and the mod maps in",
+  ", com dependências e ordem. Uma cópia de segurança vai para a pasta": ", with dependencies and order. A backup copy goes to the folder",
+  "Seus servidores": "Your servers", "{} configuração(ões)": "{0} configuration(s)", "perfil atual": "current profile", "Arquivo": "File", "Editar mods": "Edit mods",
+  "Nenhum servidor ainda": "No servers yet", "No jogo, vá em": "In the game, go to", "Hospedar → Gerenciar configurações": "Host → Manage settings",
+  "e crie um. Ele aparece aqui na hora.": "and create one. It shows up here right away.",
+};
+const TR_EXACT = new Map(), TR_PAT = [];
+for (const [k, v] of Object.entries(TR)) {
+  if (!k.includes("{}")) { TR_EXACT.set(k, v); continue; }
+  const parts = k.split("{}");
+  TR_PAT.push({
+    re: new RegExp("^" + parts.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("(.+?)") + "$", "s"), v,
+    lit: parts.reduce((a, b) => b.length > a.length ? b : a, ""),   // filtro rápido antes da regex
+  });
+}
+// o mais específico primeiro: "Desativar os {} mods de…" antes de "Desativar {}"
+TR_PAT.sort((x, y) => y.re.source.replace(/\(\.\+\?\)/g, "").length - x.re.source.replace(/\(\.\+\?\)/g, "").length);
+function trText(s) {
+  const e = TR_EXACT.get(s); if (e != null) return e;
+  for (const p of TR_PAT) {
+    if (p.lit && !s.includes(p.lit)) continue;
+    const m = p.re.exec(s); if (!m) continue;
+    return p.v.replace(/\{(\d)\}/g, (_, i) => { const g = m[+i + 1]; return trText(g); });
+  }
+  const b = /^([•✓]\s*)(.+)$/s.exec(s);   // marcador de lista no início: traduz o resto
+  if (b) { const t = trText(b[2]); if (t !== b[2]) return b[1] + t; }
+  return s;
+}
+function trLine(line) {
+  const m = /^(\s*)([\s\S]*?)(\s*)$/.exec(line), core = m[2].replace(/\s+/g, " ");
+  if (!core) return line;
+  const t = trText(core);
+  return t === core ? line : m[1] + t + m[3];
+}
+// texto com quebras de linha (pop-ups): tenta inteiro; se não achar, linha por linha
+function trString(s) {
+  const t = trLine(s);
+  return t !== s || !s.includes("\n") ? t : s.split("\n").map(trLine).join("\n");
+}
+const TR_ATTRS = ["title", "placeholder", "aria-label", "aria-valuetext", "label"];
+function trNode(n) {
+  const p = n.parentElement;
+  if (p?.closest("script,style,code,textarea,.langsw")) return;
+  const v = n.nodeValue;
+  if (!/[A-Za-zÀ-ú]/.test(v)) return;
+  const t = trString(v);
+  if (t !== v) n.nodeValue = t;
+}
+function trAttrs(el) {
+  if (el.nodeType !== 1) return;
+  for (const a of TR_ATTRS) { const v = el.getAttribute(a); if (v) { const t = trString(v); if (t !== v) el.setAttribute(a, t); } }
+}
+function trTree(root) {
+  if (root.nodeType === 3) return trNode(root);
+  if (root.nodeType !== 1) return;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let n; (n = w.nextNode());) trNode(n);
+  trAttrs(root); root.querySelectorAll("*").forEach(trAttrs);
+}
+if (EN_ON) {
+  trTree(document.body);
+  new MutationObserver(ms => {
+    for (const m of ms) {
+      if (m.type === "childList") m.addedNodes.forEach(trTree);
+      else if (m.type === "characterData") trNode(m.target);
+      else trAttrs(m.target);
+    }
+  }).observe(document.body, {childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: TR_ATTRS});
+}
+document.querySelector(`.langsw [data-v="${LANG}"]`)?.classList.add("on");
+
 const ZB_ID = "3619862853", VP_ID = "3809306528";
 const ICONS = {
   dash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
@@ -379,12 +682,12 @@ const store = {
 function ago(unix) {
   if (!unix) return "—";
   const s = Date.now() / 1000 - unix;
-  if (s < 3600) return Math.max(1, Math.round(s / 60)) + " min atrás";
-  if (s < 86400) return Math.round(s / 3600) + " h atrás";
-  if (s < 86400 * 30) return Math.round(s / 86400) + " dias atrás";
-  return new Date(unix * 1000).toLocaleDateString("pt-BR");
+  if (s < 3600) return Math.max(1, Math.round(s / 60)) + L(" min atrás", " min ago");
+  if (s < 86400) return Math.round(s / 3600) + L(" h atrás", " h ago");
+  if (s < 86400 * 30) { const d = Math.round(s / 86400); return d + (d === 1 ? L(" dia atrás", " day ago") : L(" dias atrás", " days ago")); }
+  return new Date(unix * 1000).toLocaleDateString(LOC);
 }
-const fmtN = n => n == null ? "" : n >= 1e6 ? (n / 1e6).toFixed(1).replace(".", ",") + " mi" : n >= 1e3 ? Math.round(n / 1e3) + " mil" : String(n);
+const fmtN = n => n == null ? "" : n >= 1e6 ? (n / 1e6).toLocaleString(LOC, {minimumFractionDigits: 1, maximumFractionDigits: 1}) + L(" mi", "M") : n >= 1e3 ? Math.round(n / 1e3) + L(" mil", "k") : String(n);
 // URL para url('...') em style: o HTML decodifica &#39; antes do CSS, então aspas/parênteses viram %xx
 const cssUrl = u => /^https:\/\//i.test(u || "") ? encodeURI(u).replace(/['()]/g, c => "%" + c.charCodeAt(0).toString(16)) : "";
 const thumbUrl = (u, w = 160, h = 160) => u ? u + (u.includes("?") ? "&" : "?") + `imw=${w}&imh=${h}&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true` : null;
@@ -499,7 +802,7 @@ const OBS_DESC = /(this mod is (now )?(obsolete|deprecated|discontinued|no long
 /** memória recomendada: metade da RAM, deixando 4 GB livres, até 8 GB */
 /* ---------- memória do jogo ---------- */
 const MEM_MIN = 2048, MEM_STEP = 512;
-const gb = mb => (mb / 1024).toLocaleString("pt-BR", {maximumFractionDigits: 1}) + " GB";
+const gb = mb => (mb / 1024).toLocaleString(LOC, {maximumFractionDigits: 1}) + " GB";
 // teto = RAM - 4 GB (mesma regra do C#, GameMemory.Set)
 const memMax = () => Math.max(MEM_MIN, Math.floor((S.memory.totalMb - 4096) / MEM_STEP) * MEM_STEP);
 /** Estimativa do que os mods ativos pedem. Calibrada no caso real: 88 mods + Java + mapa gigante
@@ -541,7 +844,7 @@ function memCard() {
   const a = pct(need.mb * 0.75), b = pct(need.mb), c = pct(m.totalMb - 6144);
   const track = `linear-gradient(90deg,#e5534bb0 0 ${a}%,#e3a63bb0 ${a}% ${b}%,#4fb477b0 ${b}% ${c}%,#e3a63bb0 ${c}% 100%)`;
   const ticks = [MEM_MIN, ...[4096, 8192, 12288, 16384, 24576, 32768].filter(x => x < max - 1024), max];
-  const what = [`${need.mods} mods ativos`, need.java ? `${need.java} com Java` : "", need.maps ? `${need.maps} com mapa` : ""].filter(Boolean).join(", ");
+  const what = [`${need.mods} ${L("mods ativos", "enabled mods")}`, need.java ? `${need.java} ${L("com Java", "with Java")}` : "", need.maps ? `${need.maps} ${L("com mapa", "with maps")}` : ""].filter(Boolean).join(", ");
   const pending = v !== m.xmxMb;
   return `<div class="card" id="memCard">
     <h2>Memória do jogo</h2>
@@ -1086,6 +1389,12 @@ document.addEventListener("click", async e => {
   const a = t.dataset.a, v = t.dataset.v;
   switch (a) {
     case "nav": return setView(v);
+    case "lang":
+      if (v === LANG) return;
+      if (dirty) { clearTimeout(saveTimer); await saveProfile(); }
+      store.set("lang", v);
+      try { await call("setLang", {lang: v}, 5000); } catch {}
+      return location.reload();
     case "play": return call("open", {url: "steam://rungameid/108600"});
     case "downloads": return call("open", {url: "steam://open/downloads"});
     case "ws": return call("open", {url: "https://steamcommunity.com/sharedfiles/filedetails/?id=" + v});
@@ -1337,7 +1646,7 @@ function renderList() {
     const ia = P.active.indexOf(a.id), ib = P.active.indexOf(b.id);
     if (ia >= 0 && ib >= 0) return ia - ib;
     if (ia >= 0) return -1; if (ib >= 0) return 1;
-    return a.name.localeCompare(b.name, "pt-BR");
+    return a.name.localeCompare(b.name, LOC);
   });
   if (!mods.length) {
     el.innerHTML = S.mods.length ? `<div class="empty"><b>Nenhum mod aqui</b>Ajuste a busca ou o filtro.</div>`
@@ -1363,7 +1672,7 @@ function modRow(m, A, act) {
   else if (iss.some(i => i.tag === "soon")) b.push(`<span class="badge" title="Pode ficar obsoleto em breve">vai ficar obsoleto?</span>`);
   if (m.source === "local") b.push(`<span class="badge">local</span>`);
   const thumb = it?.preview ? `<img class="thumb" loading="lazy" src="${esc(thumbUrl(it.preview, 96, 96))}">` : `<div class="thumb ph">${esc((m.name || "?").slice(0, 2).toUpperCase())}</div>`;
-  const sub = [m.id !== m.name ? m.id : null, it?.title && it.title !== m.name ? it.title : null, it?.remoteTimeUpdated ? "atualizado " + ago(it.remoteTimeUpdated) : null].filter(Boolean).map(esc).join(" · ");
+  const sub = [m.id !== m.name ? m.id : null, it?.title && it.title !== m.name ? it.title : null, it?.remoteTimeUpdated ? L("atualizado ", "updated ") + ago(it.remoteTimeUpdated) : null].filter(Boolean).map(esc).join(" · ");
   const open = expanded.has(m.key);
   return `<div class="mod ${on ? "active" : ""}">
     <div class="line" data-a="expand" data-v="${esc(m.key)}">
@@ -1409,7 +1718,7 @@ function recCategory(r) {
   if (t.some(x => ["Models", "Textures", "Terrain", "Map"].includes(x))) return "vis";
   return "other";
 }
-const REC_CATS = [["all", "Todos"], ["vis", "Visual e 3D"], ["ui", "Interface e QOL"], ["weap", "Armas"], ["veh", "Veículos"], ["other", "Outros"]];
+const REC_CATS = [["all", L("Todos", "All")], ["vis", L("Visual e 3D", "Visual & 3D")], ["ui", L("Interface e QOL", "UI & QoL")], ["weap", L("Armas", "Weapons")], ["veh", L("Veículos", "Vehicles")], ["other", L("Outros", "Other")]];
 function recCard(r, note) {
   const inst = I.items.has(r.id), on = inst && itemActive(r.id), pend = pendingActivate.has(r.id) || isSubscribed(r.id);
   const obsolete = /not needed/i.test(r.title);
@@ -1423,7 +1732,7 @@ function recCard(r, note) {
     <div class="img" style="background-image:url('${esc(cssUrl(r.preview ? r.preview + (r.preview.includes("?") ? "&" : "?") + "imw=512" : ""))}')"><div class="tl">
       ${inst ? `<span class="badge ok">Inscrito</span>` : ""}${obsolete ? `<span class="badge warn">Obsoleto</span>` : ""}</div></div>
     <div class="bd"><b>${esc(r.title)}</b>
-      <div class="meta">${fmtN(r.subscriptions)} inscritos · atualizado ${ago(r.timeUpdated)}${cat && !note ? " · " + cat : ""}</div>
+      <div class="meta">${fmtN(r.subscriptions)} ${L("inscritos", "subscribers")} · ${L("atualizado", "updated")} ${ago(r.timeUpdated)}${cat && !note ? " · " + cat : ""}</div>
       ${note ? `<div class="nt">${esc(note)}</div>` : r.shortDesc ? `<div class="nt" style="color:var(--muted);font-size:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${esc(r.shortDesc)}</div>` : ""}
     </div>
     <div class="ft">${btn}<span class="sp"></span><a style="font-size:12px" data-a="ws" data-v="${r.id}">Workshop ↗</a></div>
@@ -1604,6 +1913,7 @@ function viewSrv() {
 (async () => {
   try {
     await loadState();
+    call("setLang", {lang: LANG}).catch(() => {});
     render();
     memIntro();
     if (Q) renderQueue();

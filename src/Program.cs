@@ -13,7 +13,7 @@ static class Program
         using var mutex = new Mutex(true, "PZModManager_SingleInstance", out bool first);
         if (!first)
         {
-            MessageBox.Show("O PZ Mod Manager já está aberto.", "PZ Mod Manager",
+            MessageBox.Show(Lang.T("O PZ Mod Manager já está aberto.", "PZ Mod Manager is already open."), "PZ Mod Manager",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
@@ -21,7 +21,8 @@ static class Program
         Application.ThreadException += (_, e) =>
         {
             Log.Error("UI", e.Exception);
-            MessageBox.Show("Ocorreu um erro inesperado:\n\n" + e.Exception.Message + "\n\nDetalhes em dados\\log.txt.",
+            MessageBox.Show(Lang.T("Ocorreu um erro inesperado:", "An unexpected error occurred:") + "\n\n" + e.Exception.Message + "\n\n" +
+                Lang.T("Detalhes em dados\\log.txt.", "Details in dados\\log.txt."),
                 "PZ Mod Manager", MessageBoxButtons.OK, MessageBoxIcon.Error);
         };
         AppDomain.CurrentDomain.UnhandledException += (_, e) => Log.Write("FATAL: " + e.ExceptionObject);

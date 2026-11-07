@@ -54,7 +54,7 @@ public sealed class MainForm : Form
             catch (Exception ex)
             {
                 Log.Error("InitWeb", ex);
-                MessageBox.Show(this, "Não foi possível iniciar a interface (WebView2).\n\n" + ex.Message,
+                MessageBox.Show(this, Lang.T("Não foi possível iniciar a interface (WebView2).", "Couldn't start the interface (WebView2).") + "\n\n" + ex.Message,
                     "PZ Mod Manager", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         };
@@ -191,7 +191,7 @@ public sealed class MainForm : Form
         var args = msg?["args"] as JsonObject ?? new JsonObject();
         object? result = null; string? error = null;
         var sw = Stopwatch.StartNew();
-        bool quiet = cmd is "getState" or "getProfile" or "open" or "steamStatus";
+        bool quiet = cmd is "getState" or "getProfile" or "open" or "steamStatus" or "setLang";
         if (!quiet) Log.Write($"> {cmd}");
         _currentCmd = cmd;
         try
@@ -288,6 +288,10 @@ public sealed class MainForm : Form
 
             case "zbUninstall":
                 return ZombieBuddy.Uninstall(_paths);
+
+            case "setLang":
+                Lang.Set(S(a, "lang"));
+                return true;
 
             case "restoreLauncher":
                 return Launcher.RestoreOriginals(_paths);

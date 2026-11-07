@@ -12,20 +12,22 @@
 </p>
 
 <p align="center">
-  <img src="docs/img/painel.png" width="860" alt="Painel do PZ Mod Manager">
+  <img src="docs/img/pt-BR/painel.png" width="860" alt="Painel do PZ Mod Manager">
 </p>
+
+> A interface tem **inglês** (padrão) e **português do Brasil**: troque pela chave **EN | PT** no topo da janela.
 
 ## O que ele faz
 
 ### Memória do jogo (RAM)
 O Project Zomboid vem limitado a **3 GB de RAM**. Com muitos mods, mapas grandes ou mods Java, o jogo trava ou fecha ao carregar o mundo (`OutOfMemoryError`). O app estima quanto os seus mods ativos precisam e mostra se o valor escolhido é **Insuficiente**, **Apertado**, **Bom** ou se deixa pouca RAM para o Windows. A mudança só é gravada quando você clica em **Aplicar**.
 
-<p align="center"><img src="docs/img/memoria.gif" width="860" alt="Pop-up sobre a RAM e barra de memória sendo ajustada"></p>
+<p align="center"><img src="docs/img/pt-BR/memoria.gif" width="860" alt="Pop-up sobre a RAM e barra de memória sendo ajustada"></p>
 
 ### Conflitos entre mods
 Mostra quando dois mods ativos mexem na mesma coisa e qual deles vence (o que carrega por último). Ele compara arquivos de código, itens, veículos, receitas, modelos 3D e células de mapa. Cada caso vem explicado em português e com botões para **escolher quem vence**, **desativar** um dos mods ou **ignorar** o alerta. Patches e dependências são reconhecidos como **Esperados**, e há um mapa visual dos cruzamentos.
 
-<p align="center"><img src="docs/img/conflitos.gif" width="860" alt="Aba Conflitos com cartões e mapa visual"></p>
+<p align="center"><img src="docs/img/pt-BR/conflitos.gif" width="860" alt="Aba Conflitos com cartões e mapa visual"></p>
 
 ### Mods, dependências e obsoletos
 - Ativa e desativa mods por perfil: **novo jogo**, cada **save** e cada **servidor** que você hospeda (`Mods=`, `WorkshopItems=` e `Map=` atualizados juntos).
@@ -34,7 +36,7 @@ Mostra quando dois mods ativos mexem na mesma coisa e qual deles vence (o que ca
 - Marca mods **obsoletos** (só B41, removidos do Workshop, feitos para uma versão anterior do jogo ou marcados pelo autor como descontinuados) e os que **podem ficar obsoletos** em breve.
 - Busca, filtros e o botão **Corrigir automaticamente**.
 
-<p align="center"><img src="docs/img/mods.gif" width="860" alt="Aba Mods com busca, filtro de obsoletos e detalhes"></p>
+<p align="center"><img src="docs/img/pt-BR/mods.gif" width="860" alt="Aba Mods com busca, filtro de obsoletos e detalhes"></p>
 
 ### Project Viewpoint em um clique
 Inscreve no **ZombieBuddy** e no **Project Viewpoint**, instala o ZombieBuddy na pasta do jogo e ativa os dois no perfil escolhido. A aba **Recomendados** lista os addons do Viewpoint mais usados, direto do Workshop.

@@ -15,7 +15,7 @@
   <img src="docs/img/painel.png" width="860" alt="PZ Mod Manager dashboard">
 </p>
 
-> The app's interface is in **Brazilian Portuguese** only. The screenshots below show it as it is.
+> The interface is available in **English** (default) and **Brazilian Portuguese**: switch with the **EN | PT** toggle at the top of the window.
 
 ## What it does
 
