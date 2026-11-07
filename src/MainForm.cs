@@ -54,8 +54,15 @@ public sealed class MainForm : Form
             catch (Exception ex)
             {
                 Log.Error("InitWeb", ex);
-                MessageBox.Show(this, Lang.T("Não foi possível iniciar a interface (WebView2).", "Couldn't start the interface (WebView2).") + "\n\n" + ex.Message,
-                    "PZ Mod Manager", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // quase sempre é o WebView2 Runtime ausente (algumas edições do Windows 10 não o trazem)
+                var open = MessageBox.Show(this,
+                    Lang.T("Não foi possível iniciar a interface.\n\nO app precisa do Microsoft Edge WebView2 Runtime, que já vem no Windows 11 e junto com o Microsoft Edge. " +
+                           "Instale a versão \"Evergreen Bootstrapper\" na página oficial da Microsoft e abra o app de novo.\n\nAbrir a página de download agora?",
+                           "Couldn't start the interface.\n\nThe app needs the Microsoft Edge WebView2 Runtime, which comes with Windows 11 and with Microsoft Edge. " +
+                           "Install the \"Evergreen Bootstrapper\" from Microsoft's official page and open the app again.\n\nOpen the download page now?") +
+                    "\n\n(" + ex.Message + ")",
+                    "PZ Mod Manager", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                if (open == DialogResult.Yes) OpenExternal("https://developer.microsoft.com/microsoft-edge/webview2/");
             }
         };
         StartUiWatchdog();

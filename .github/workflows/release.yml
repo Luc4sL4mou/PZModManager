@@ -55,6 +55,6 @@ jobs:
           if ($LASTEXITCODE -eq 0) {
             gh release upload $env:TAG @files --clobber
           } else {
-            gh release create $env:TAG @files --title "PZ Mod Manager $env:TAG" --notes-file .github/release-notes.md --verify-tag
+            gh release create $env:TAG @files --title "PZ Mod Manager $env:TAG (beta)" --notes-file .github/release-notes.md --verify-tag
           }
           if ($LASTEXITCODE -ne 0) { throw "Falha ao publicar a Release" }

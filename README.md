@@ -15,6 +15,8 @@
   <img src="docs/img/painel.png" width="860" alt="PZ Mod Manager dashboard">
 </p>
 
+> **Beta:** the app works and is in daily use, but it hasn't been tested on many PCs yet. If something goes wrong, please [open an issue](https://github.com/Luc4sL4mou/PZModManager/issues/new/choose) and it will be fixed quickly.
+
 > The interface is available in **English** (default) and **Brazilian Portuguese**: switch with the **EN | PT** toggle at the top of the window.
 
 ## What it does

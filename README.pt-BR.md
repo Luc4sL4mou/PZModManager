@@ -15,6 +15,8 @@
   <img src="docs/img/pt-BR/painel.png" width="860" alt="Painel do PZ Mod Manager">
 </p>
 
+> **Beta:** o app funciona e é usado no dia a dia, mas ainda foi testado em poucos PCs. Se algo der errado, [abra uma issue](https://github.com/Luc4sL4mou/PZModManager/issues/new/choose) que a correção sai rápido.
+
 > A interface tem **inglês** (padrão) e **português do Brasil**: troque pela chave **EN | PT** no topo da janela.
 
 ## O que ele faz

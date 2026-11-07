@@ -2,6 +2,11 @@
 
 All notable changes to PZ Mod Manager. Downloads: [Releases](https://github.com/Luc4sL4mou/PZModManager/releases).
 
+## [1.2.1] - 2026-11-07 (beta)
+### Changed
+- Public beta: the release title and the READMEs say so; please report problems through the bug report form.
+- If the Microsoft Edge WebView2 Runtime is missing, the app now explains what it is and offers to open Microsoft's official download page (instead of a short technical error).
+
 ## [1.2.0] - 2026-11-07
 ### Added
 - Bilingual interface: English (default) and Brazilian Portuguese, with an **EN | PT** toggle at the top. Dates, numbers and the app's own messages follow the chosen language.
@@ -29,6 +34,7 @@ All notable changes to PZ Mod Manager. Downloads: [Releases](https://github.com/
 - Automatic backups before changing game files; safe (atomic) writes; no changes while the game is running.
 - Single exe, no installation required.
 
+[1.2.1]: https://github.com/Luc4sL4mou/PZModManager/releases/tag/v1.2.1
 [1.2.0]: https://github.com/Luc4sL4mou/PZModManager/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Luc4sL4mou/PZModManager/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Luc4sL4mou/PZModManager/releases/tag/v1.0.0

@@ -1,19 +1,23 @@
 ### English
+**Public beta.** The app works and is in daily use, but it hasn't been tested on many PCs yet. Found a problem? Use the [bug report form](https://github.com/Luc4sL4mou/PZModManager/issues/new/choose).
+
 **How to use:** download `PZModManager-win-x64.zip`, extract it (right-click → **Extract All**) and open `PZModManager.exe`. Nothing to install.
 If you see **"Windows protected your PC"**, click **More info → Run anyway** (the app is not digitally signed yet).
 
 **What's new**
-- **Bilingual interface:** English (default) and Brazilian Portuguese, switched with the **EN | PT** toggle at the top. Dates, numbers and the messages from the app itself follow the chosen language; mod names and Workshop texts stay as their authors wrote them.
-- README GIFs recorded in English (the Portuguese README keeps Portuguese GIFs).
+- If the Microsoft Edge WebView2 Runtime is missing (some Windows 10 editions), the app explains it and offers to open Microsoft's official download page.
+- Interface in English (default) and Brazilian Portuguese, with the **EN | PT** toggle at the top (since 1.2.0).
 
 Zip built by GitHub Actions from the source code, with a build provenance attestation (`gh attestation verify PZModManager-win-x64.zip --repo Luc4sL4mou/PZModManager`). The SHA-256 is in the `.sha256` file.
 
 ### Português
+**Beta público.** O app funciona e é usado no dia a dia, mas ainda foi testado em poucos PCs. Achou um problema? Use o [formulário de bug](https://github.com/Luc4sL4mou/PZModManager/issues/new/choose).
+
 **Como usar:** baixe o `PZModManager-win-x64.zip`, extraia (botão direito → **Extrair tudo**) e abra o `PZModManager.exe`. Não precisa instalar nada.
 Se aparecer **"O Windows protegeu o computador"**, clique em **Mais informações → Executar assim mesmo** (o app ainda não tem assinatura digital).
 
 **Novidades**
-- **Interface bilíngue:** inglês (padrão) e português do Brasil, com a chave **EN | PT** no topo. Datas, números e as mensagens do próprio app seguem o idioma escolhido; nomes de mods e textos do Workshop continuam como os autores escreveram.
-- GIFs do README gravados em inglês (o README em português mantém os GIFs em português).
+- Se faltar o Microsoft Edge WebView2 Runtime (algumas edições do Windows 10), o app explica e oferece abrir a página oficial de download da Microsoft.
+- Interface em inglês (padrão) e português do Brasil, com a chave **EN | PT** no topo (desde a 1.2.0).
 
 Zip compilado pelo GitHub Actions a partir do código, com atestado de proveniência (`gh attestation verify PZModManager-win-x64.zip --repo Luc4sL4mou/PZModManager`). O SHA-256 está no arquivo `.sha256`.

@@ -9,7 +9,7 @@
     <AssemblyName>PZModManager</AssemblyName>
     <RootNamespace>PZModManager</RootNamespace>
     <ApplicationIcon>app.ico</ApplicationIcon>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <Product>PZ Mod Manager</Product>
     <SatelliteResourceLanguages>pt-BR</SatelliteResourceLanguages>
     <MSBuildWarningsAsMessages>MSB3277</MSBuildWarningsAsMessages>
