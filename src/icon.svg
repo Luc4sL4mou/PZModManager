@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="skin" cx="35%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#8fbf6a"/><stop offset=".6" stop-color="#6f9d50"/><stop offset="1" stop-color="#4e7638"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d6dde3"/><stop offset=".5" stop-color="#9eabb6"/><stop offset="1" stop-color="#6b7884"/>
+    </linearGradient>
+    <radialGradient id="led" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#ff8a7a"/><stop offset=".7" stop-color="#e5372b"/><stop offset="1" stop-color="#7a0f0a"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ff4a3a" stop-opacity=".55"/><stop offset="1" stop-color="#ff4a3a" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="head"><circle cx="128" cy="134" r="110"/></clipPath>
+    <!-- costura em zigue-zague: tudo à direita dela é robô -->
+    <clipPath id="robot"><path d="M134 0 L124 40 L138 78 L122 118 L138 158 L122 198 L136 256 L256 256 L256 0 Z"/></clipPath>
+  </defs>
+
+  <!-- antena do lado robô -->
+  <line x1="190" y1="40" x2="208" y2="10" stroke="#24313a" stroke-width="10" stroke-linecap="round"/>
+  <line x1="190" y1="40" x2="208" y2="10" stroke="#8e9ba6" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="209" cy="10" r="9" fill="url(#led)" stroke="#24313a" stroke-width="4"/>
+
+  <!-- cabeça -->
+  <circle cx="128" cy="134" r="110" fill="url(#skin)"/>
+  <g clip-path="url(#head)">
+    <!-- cérebro exposto (lado zumbi) -->
+    <path d="M30 70 Q40 30 92 26 L104 40 L90 52 L100 66 L78 72 L62 66 L46 80 Z" fill="#c98f86" stroke="#5a3a33" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M52 62 q8 -10 16 -2 q8 -10 16 -2 M60 46 q8 -8 18 -2 M70 60 q4 6 12 4" fill="none" stroke="#8a5a52" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- marcas na pele -->
+    <path d="M44 150 l14 -4 M48 142 l4 14 M58 140 l4 14" stroke="#3f5f2d" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- lado robô -->
+    <g clip-path="url(#robot)">
+      <rect x="0" y="0" width="256" height="256" fill="url(#metal)"/>
+      <path d="M150 60 H240 M160 196 H240 M206 60 V100" stroke="#5f6c77" stroke-width="3" opacity=".7"/>
+      <g fill="#5f6c77"><circle cx="160" cy="48" r="5"/><circle cx="222" cy="72" r="5"/><circle cx="168" cy="208" r="5"/><circle cx="222" cy="186" r="5"/></g>
+      <g fill="#e9eef2"><circle cx="159" cy="47" r="2"/><circle cx="221" cy="71" r="2"/><circle cx="167" cy="207" r="2"/><circle cx="221" cy="185" r="2"/></g>
+    </g>
+    <!-- grampos da costura -->
+    <path d="M134 0 L124 40 L138 78 L122 118 L138 158 L122 198 L136 256" fill="none" stroke="#2b3a24" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M118 30 l14 6 M120 92 l20 -4 M116 136 l22 4 M116 178 l22 -2" stroke="#c9cfd4" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <circle cx="128" cy="134" r="110" fill="none" stroke="#1f2a1a" stroke-width="9"/>
+
+  <!-- olho zumbi: grande, pupila pequena, olheira roxa -->
+  <ellipse cx="78" cy="118" rx="34" ry="32" fill="#6b3d6a" opacity=".85"/>
+  <ellipse cx="82" cy="114" rx="28" ry="27" fill="#f4f1e8" stroke="#1f2a1a" stroke-width="5"/>
+  <circle cx="90" cy="118" r="6" fill="#1f2a1a"/>
+  <path d="M52 84 q22 -10 44 -2" fill="none" stroke="#1f2a1a" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- olho robô: lente vermelha acesa -->
+  <circle cx="178" cy="114" r="40" fill="url(#glow)"/>
+  <circle cx="178" cy="114" r="28" fill="#2a333b" stroke="#1f2a1a" stroke-width="5"/>
+  <circle cx="178" cy="114" r="17" fill="url(#led)"/>
+  <circle cx="172" cy="108" r="4" fill="#fff" opacity=".9"/>
+
+  <!-- boca: dentes tortos no lado zumbi, grade no lado robô -->
+  <path d="M74 176 Q128 168 186 172 Q190 200 128 206 Q72 206 74 176 Z" fill="#2a1414" stroke="#1f2a1a" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M84 176 l16 -1 l-1 17 l-14 -2 Z M104 175 l15 0 l-1 12 l-13 1 Z" fill="#f2ecd8" stroke="#1f2a1a" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M110 205 l2 -14 l14 1 l0 13 Z" fill="#f2ecd8" stroke="#1f2a1a" stroke-width="3" stroke-linejoin="round"/>
+  <g stroke="#9eabb6" stroke-width="5" stroke-linecap="round">
+    <line x1="142" y1="176" x2="142" y2="200"/><line x1="156" y1="175" x2="156" y2="198"/><line x1="170" y1="175" x2="170" y2="194"/>
+  </g>
+</svg>

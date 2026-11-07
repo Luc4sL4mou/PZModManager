@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PZ Mod Manager</title>
+<meta name="color-scheme" content="dark">
+<style>
+:root{
+  --bg:#111315; --panel:#181b1e; --panel2:#1f2327; --panel3:#262b30; --border:#2d3338; --border2:#3a4148;
+  --text:#e7e9eb; --muted:#9aa3ab; --dim:#6c757d;
+  --accent:#c9473c; --accent2:#e05a4e; --ok:#4fb477; --warn:#e3a63b; --err:#e5534b; --info:#5b9bd5;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;overflow:hidden}
+button{font:inherit;color:inherit}
+a{color:var(--info);text-decoration:none;cursor:pointer}
+a:hover{text-decoration:underline}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#2c3237;border-radius:10px;border:2px solid var(--bg)}
+::-webkit-scrollbar-track{background:transparent}
+.app{display:grid;grid-template-columns:232px 1fr;grid-template-rows:minmax(0,1fr);height:100%}
+
+/* sidebar */
+.side{background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:18px 12px;overflow-y:auto;min-height:0}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 8px 18px}
+.logo{width:40px;height:40px;flex:none;filter:drop-shadow(0 3px 8px #0008)}
+.brand b{display:block;font-size:15px}
+.brand span{font-size:11.5px;color:var(--muted)}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav button{all:unset;display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;color:var(--muted);cursor:pointer;font-weight:500}
+.nav button:hover{background:var(--panel2);color:var(--text)}
+.nav button.on{background:var(--panel3);color:var(--text);box-shadow:inset 3px 0 0 var(--accent)}
+.nav svg{width:18px;height:18px;flex:none}
+.nav .count{margin-left:auto;font-size:11px;background:var(--err);color:#fff;border-radius:10px;padding:1px 7px;font-weight:700}
+.nav .count.warn{background:var(--warn);color:#1a1a1a}
+.side .grow{flex:1}
+.gamebox{background:var(--panel2);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:12.5px;color:var(--muted)}
+.gamebox .row{display:flex;justify-content:space-between;margin-bottom:4px}
+.gamebox .row b{color:var(--text);font-weight:600}
+.play{margin-top:10px;width:100%}
+
+/* main */
+.main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.top{display:flex;align-items:center;gap:12px;padding:14px 26px;border-bottom:1px solid var(--border);background:var(--bg)}
+.top h1{font-size:19px;margin:0;font-weight:650;letter-spacing:-.2px}
+.top .sp{flex:1}
+.profile{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12.5px}
+select,input[type=text]{background:var(--panel2);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:7px 10px;font:inherit;outline:none}
+select:focus,input[type=text]:focus{border-color:var(--accent)}
+select{min-width:230px;cursor:pointer}
+.savechip{font-size:12px;color:var(--muted);min-width:90px;text-align:right}
+.savechip.ok{color:var(--ok)}
+.content{flex:1;min-height:0;overflow:auto;padding:22px 26px 90px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border2);background:var(--panel3);padding:7px 13px;border-radius:8px;cursor:pointer;font-weight:550;font-size:13px;white-space:nowrap;transition:background .12s,border-color .12s}
+.btn:hover{background:#2f353b;border-color:#4a525a}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent2);border-color:var(--accent2)}
+.btn.ok{background:#22412f;border-color:#2f5d41;color:#bff0d0}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--panel2);color:var(--text)}
+.btn.sm{padding:4px 9px;font-size:12px;border-radius:7px}
+.btn.lg{padding:11px 20px;font-size:14.5px;border-radius:10px}
+.btn:disabled{opacity:.45;pointer-events:none}
+.btn svg{width:15px;height:15px}
+
+/* cards */
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(360px,1fr))}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px}
+.card h2{font-size:15px;margin:0 0 4px;font-weight:650}
+.card .sub{color:var(--muted);font-size:12.5px;margin-bottom:14px}
+.hero{position:relative;overflow:hidden;padding:24px;border-radius:16px;border:1px solid var(--border);background:linear-gradient(110deg,#1b1e21 30%,#25191780),var(--panel)}
+.hero .bgimg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.22;filter:saturate(.8);mask-image:linear-gradient(90deg,transparent 25%,#000 85%)}
+.hero > *{position:relative}
+.hero h2{font-size:21px;margin:0 0 4px;letter-spacing:-.3px}
+.hero p{color:var(--muted);margin:0 0 18px;max-width:640px}
+.steps{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;max-width:720px}
+.step{display:flex;align-items:center;gap:12px;background:#15181bcc;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.step .ic{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:13px;font-weight:700;background:var(--panel3);color:var(--muted);border:1px solid var(--border2)}
+.step.done .ic{background:var(--ok);border-color:var(--ok);color:#0b1a10}
+.step.cur .ic{background:var(--accent);border-color:var(--accent);color:#fff}
+.step .tx{flex:1}
+.step .tx b{display:block;font-weight:600}
+.step .tx span{font-size:12px;color:var(--muted)}
+.step.done .tx b{color:#b7dcc4}
+
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px}
+.kv span{color:var(--muted)}
+.kv code{font-family:Consolas,monospace;font-size:12px;color:#cfd6dc;word-break:break-all}
+.checks{display:flex;flex-direction:column;gap:7px;margin:4px 0 14px}
+.chk{display:flex;align-items:center;gap:9px;font-size:13px}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--dim)}
+.dot.ok{background:var(--ok);box-shadow:0 0 0 3px #4fb47722}
+.dot.err{background:var(--err);box-shadow:0 0 0 3px #e5534b22}
+.dot.warn{background:var(--warn);box-shadow:0 0 0 3px #e3a63b22}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.note{font-size:12px;color:var(--muted);background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;margin-top:12px}
+.note b{color:var(--text)}
+.statline{display:flex;gap:12px;flex-wrap:wrap}
+.stat{flex:1;min-width:120px;background:var(--panel2);border:1px solid var(--border);border-radius:11px;padding:12px 14px}
+.stat b{font-size:22px;display:block;letter-spacing:-.5px}
+.stat span{font-size:12px;color:var(--muted)}
+.stat.err b{color:var(--err)} .stat.warn b{color:var(--warn)} .stat.ok b{color:var(--ok)}
+
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:var(--panel3);color:var(--muted);border:1px solid var(--border2);white-space:nowrap}
+.badge.err{background:#3a1a19;color:#ff9b94;border-color:#5a2724}
+.badge.warn{background:#3a2d14;color:#f3c877;border-color:#5a4520}
+.badge.ok{background:#173323;color:#8fdcae;border-color:#24503a}
+.badge.info{background:#172a3d;color:#9cc6ef;border-color:#22415f}
+.badge.java{background:#2e1f3d;color:#d1aef5;border-color:#45305c}
+
+/* toolbar + list */
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.toolbar input[type=text]{width:280px}
+.chips{display:flex;gap:6px}
+.chip{all:unset;cursor:pointer;padding:6px 12px;border-radius:20px;font-size:12.5px;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-weight:550}
+.chip:hover{color:var(--text)}
+.chip.on{background:var(--panel3);border-color:var(--border2);color:var(--text)}
+.chip .n{opacity:.6;margin-left:3px}
+.issues{background:var(--panel);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden}
+.issues .hd{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border)}
+.issues .hd b{flex:1}
+.issue{display:flex;align-items:center;gap:10px;padding:8px 14px;font-size:13px;border-bottom:1px solid #22272b}
+.issue:last-child{border-bottom:0}
+.issue .who{color:var(--muted);font-size:12px;min-width:0;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.issue .tx{flex:1}
+.list{display:flex;flex-direction:column;gap:6px}
+.mod{background:var(--panel);border:1px solid var(--border);border-radius:11px;transition:border-color .12s}
+.mod:hover{border-color:var(--border2)}
+.mod.active{background:linear-gradient(90deg,#1d2125,#181b1e 60%)}
+.mod .line{display:flex;align-items:center;gap:12px;padding:9px 12px;cursor:pointer}
+.thumb{width:46px;height:46px;border-radius:8px;object-fit:cover;background:var(--panel3);flex:none;border:1px solid var(--border)}
+.thumb.ph{display:grid;place-items:center;color:var(--dim);font-weight:700;font-size:13px}
+.mod .nm{flex:1;min-width:0}
+.mod .nm b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mod .nm span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.mod .bdg{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;max-width:360px}
+.ord{font-size:11px;color:var(--dim);width:26px;text-align:right;font-variant-numeric:tabular-nums}
+.det{padding:4px 16px 16px 82px;font-size:13px;color:#c9cfd4;display:grid;gap:10px}
+.det .desc{color:var(--muted);white-space:pre-wrap;max-height:120px;overflow:auto;font-size:12.5px}
+.det .k{color:var(--muted);font-size:12px;margin-right:6px}
+.pill{display:inline-block;padding:1px 8px;border-radius:12px;font-size:12px;margin:2px 4px 2px 0;background:var(--panel3);border:1px solid var(--border2)}
+.pill.ok{border-color:#2f5d41;color:#a5dfbc}
+.pill.err{border-color:#6a2c28;color:#ffaaa3}
+.pill.off{color:var(--muted)}
+
+/* toggle */
+.tog{position:relative;width:40px;height:22px;flex:none;cursor:pointer}
+.tog input{display:none}
+.tog i{position:absolute;inset:0;border-radius:20px;background:#343a40;transition:.15s;border:1px solid #444c54}
+.tog i::after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#aeb6bd;transition:.15s}
+.tog input:checked + i{background:var(--accent);border-color:var(--accent)}
+.tog input:checked + i::after{left:20px;background:#fff}
+
+/* rec cards */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.rc{background:var(--panel);border:1px solid var(--border);border-radius:13px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .12s,transform .12s}
+.rc:hover{border-color:var(--border2);transform:translateY(-1px)}
+.rc .img{height:128px;background:#0d0f10 center/cover no-repeat;position:relative}
+.rc .img .tl{position:absolute;left:8px;top:8px;display:flex;gap:5px}
+.rc .bd{padding:12px 13px;display:flex;flex-direction:column;gap:6px;flex:1}
+.rc .bd b{font-weight:620;line-height:1.3}
+.rc .bd .meta{font-size:11.5px;color:var(--muted)}
+.rc .bd .nt{font-size:12.5px;color:#c3c9ce}
+.rc .ft{padding:0 13px 13px;display:flex;gap:6px;align-items:center}
+.rc .ft .sp{flex:1}
+.sec{display:flex;align-items:baseline;gap:12px;margin:26px 0 12px}
+.sec h3{margin:0;font-size:16px;font-weight:650}
+.sec span{color:var(--muted);font-size:12.5px}
+.sec .sp{flex:1}
+
+/* queue + toast + modal */
+.queue{position:fixed;right:22px;bottom:22px;width:360px;background:var(--panel2);border:1px solid var(--border2);border-radius:14px;padding:14px 16px;box-shadow:0 14px 40px #000a;z-index:20}
+.queue > b{display:block;margin-bottom:2px}
+.queue .bar{height:5px;background:var(--panel3);border-radius:5px;margin:10px 0;overflow:hidden}
+.queue .bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.queue p{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
+.toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:30;align-items:center;pointer-events:none}
+.toast{background:#262b30;border:1px solid var(--border2);padding:10px 16px;border-radius:10px;box-shadow:0 10px 30px #0008;font-size:13px;max-width:560px;animation:tin .18s ease-out;pointer-events:auto}
+.toast.ok{border-left:4px solid var(--ok)} .toast.err{border-left:4px solid var(--err)} .toast.warn{border-left:4px solid var(--warn)} .toast.info{border-left:4px solid var(--info)}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+.modalbg{position:fixed;inset:0;background:#0009;display:grid;place-items:center;z-index:40;backdrop-filter:blur(2px)}
+.modal{width:min(520px,92vw);background:var(--panel2);border:1px solid var(--border2);border-radius:14px;padding:20px 22px;box-shadow:0 20px 60px #000c}
+.modal h3{margin:0 0 8px;font-size:16px}
+.modal .mb{color:#cdd3d8;font-size:13.5px;white-space:pre-wrap}
+.modal .mf{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.spin{width:14px;height:14px;border:2px solid #ffffff33;border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{text-align:center;color:var(--muted);padding:50px 20px}
+.empty b{display:block;color:var(--text);font-size:15px;margin-bottom:6px}
+/* mapa de conflitos */
+.mxwrap{overflow:auto;max-height:62vh;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.mx{display:grid;gap:2px;padding:0 10px 10px 0;width:max-content}
+.mx > div{height:22px}
+.mx .lb{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px 0 10px;color:var(--muted);position:sticky;left:0;background:var(--panel);z-index:1;line-height:22px}
+.mx .lb.on{color:var(--text)}
+.mx .hd{font-size:10px;color:var(--dim);text-align:center;position:sticky;top:0;background:var(--panel);z-index:1;line-height:22px;padding-top:6px;height:28px}
+.mx .corner{position:sticky;left:0;top:0;z-index:2;background:var(--panel);height:28px}
+.mx .c{width:22px;border-radius:4px;background:var(--panel2);font-size:9.5px;display:grid;place-items:center;color:#1a1a1a;font-weight:700}
+.mx .c.d{background:var(--panel3)}
+.mx .c.hit{background:var(--warn);cursor:pointer}
+.mx .c.bad{background:var(--err);color:#fff;cursor:pointer}
+.mx .c.sel{outline:2px solid #fff;outline-offset:1px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
+.cfc{background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--border2);border-radius:12px}
+.cfc.err{border-left-color:var(--err)} .cfc.warn{border-left-color:var(--warn)} .cfc.info{border-left-color:var(--info)} .cfc.ok{border-left-color:var(--ok)}
+.cfc .ch{display:flex;align-items:center;gap:10px;padding:12px 14px 6px}
+.cfc .ch b{flex:1;min-width:0;font-weight:620}
+.cfc .ch b span{color:var(--muted);font-weight:400;margin:0 6px}
+.cfc .cb{padding:0 14px 12px;display:grid;gap:8px;font-size:13px}
+.cfc ul{margin:0;padding-left:18px;color:#c9cfd4}
+.cfc li{margin:2px 0}
+.cfc .win{font-size:12.5px;color:var(--muted)}
+.cfc .win b{color:var(--text)}
+.cfsum{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--panel);margin-bottom:14px}
+.cfsum b{font-size:15px}
+.cfsum.ok{border-color:#2f5d41;background:#16241c}
+.pts{font-family:Consolas,monospace;font-size:12px;color:#cfd6dc;max-height:220px;overflow:auto;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-top:6px;column-width:260px}
+/* memória */
+.memtop{display:flex;align-items:center;gap:10px;margin-top:4px}
+.memtop b{font-size:26px;letter-spacing:-.5px}
+.memtop .cur{margin-left:auto;font-size:12px;color:var(--muted)}
+input[type=range].mem{-webkit-appearance:none;appearance:none;width:100%;height:10px;border-radius:6px;background:var(--track);outline:none;margin:16px 0 2px;cursor:pointer}
+input[type=range].mem::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:4px solid #3a4148;box-shadow:0 2px 8px #000b}
+input[type=range].mem:focus-visible::-webkit-slider-thumb{border-color:var(--accent)}
+input[type=range].mem:disabled{opacity:.5;cursor:not-allowed}
+.memscale{position:relative;height:30px;font-size:11px;color:var(--dim);margin:0 11px}
+.memscale span{position:absolute;top:2px;transform:translateX(-50%);white-space:nowrap}
+.memscale span.rec{color:#8fdcae;font-weight:650;top:14px}
+.memscale span.rec::before{content:"";position:absolute;left:50%;top:-14px;width:2px;height:10px;background:#8fdcae;border-radius:1px}
+.memdesc{font-size:13px;color:#c9cfd4;min-height:38px}
+.srv{display:flex;align-items:center;gap:14px;padding:14px 16px}
+.srv .ic{width:40px;height:40px;border-radius:10px;background:var(--panel3);display:grid;place-items:center;flex:none}
+.srv .ic svg{width:20px;height:20px;color:var(--muted)}
+.srv .nm{flex:1}
+.srv .nm b{display:block}
+.srv .nm span{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="40" height="40">
+  <defs>
+    <radialGradient id="skin" cx="35%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#8fbf6a"/><stop offset=".6" stop-color="#6f9d50"/><stop offset="1" stop-color="#4e7638"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d6dde3"/><stop offset=".5" stop-color="#9eabb6"/><stop offset="1" stop-color="#6b7884"/>
+    </linearGradient>
+    <radialGradient id="led" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#ff8a7a"/><stop offset=".7" stop-color="#e5372b"/><stop offset="1" stop-color="#7a0f0a"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ff4a3a" stop-opacity=".55"/><stop offset="1" stop-color="#ff4a3a" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="head"><circle cx="128" cy="134" r="110"/></clipPath>
+    <!-- costura em zigue-zague: tudo à direita dela é robô -->
+    <clipPath id="robot"><path d="M134 0 L124 40 L138 78 L122 118 L138 158 L122 198 L136 256 L256 256 L256 0 Z"/></clipPath>
+  </defs>
+
+  <!-- antena do lado robô -->
+  <line x1="190" y1="40" x2="208" y2="10" stroke="#24313a" stroke-width="10" stroke-linecap="round"/>
+  <line x1="190" y1="40" x2="208" y2="10" stroke="#8e9ba6" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="209" cy="10" r="9" fill="url(#led)" stroke="#24313a" stroke-width="4"/>
+
+  <!-- cabeça -->
+  <circle cx="128" cy="134" r="110" fill="url(#skin)"/>
+  <g clip-path="url(#head)">
+    <!-- cérebro exposto (lado zumbi) -->
+    <path d="M30 70 Q40 30 92 26 L104 40 L90 52 L100 66 L78 72 L62 66 L46 80 Z" fill="#c98f86" stroke="#5a3a33" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M52 62 q8 -10 16 -2 q8 -10 16 -2 M60 46 q8 -8 18 -2 M70 60 q4 6 12 4" fill="none" stroke="#8a5a52" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- marcas na pele -->
+    <path d="M44 150 l14 -4 M48 142 l4 14 M58 140 l4 14" stroke="#3f5f2d" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- lado robô -->
+    <g clip-path="url(#robot)">
+      <rect x="0" y="0" width="40" height="40" fill="url(#metal)"/>
+      <path d="M150 60 H240 M160 196 H240 M206 60 V100" stroke="#5f6c77" stroke-width="3" opacity=".7"/>
+      <g fill="#5f6c77"><circle cx="160" cy="48" r="5"/><circle cx="222" cy="72" r="5"/><circle cx="168" cy="208" r="5"/><circle cx="222" cy="186" r="5"/></g>
+      <g fill="#e9eef2"><circle cx="159" cy="47" r="2"/><circle cx="221" cy="71" r="2"/><circle cx="167" cy="207" r="2"/><circle cx="221" cy="185" r="2"/></g>
+    </g>
+    <!-- grampos da costura -->
+    <path d="M134 0 L124 40 L138 78 L122 118 L138 158 L122 198 L136 256" fill="none" stroke="#2b3a24" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M118 30 l14 6 M120 92 l20 -4 M116 136 l22 4 M116 178 l22 -2" stroke="#c9cfd4" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <circle cx="128" cy="134" r="110" fill="none" stroke="#1f2a1a" stroke-width="9"/>
+
+  <!-- olho zumbi: grande, pupila pequena, olheira roxa -->
+  <ellipse cx="78" cy="118" rx="34" ry="32" fill="#6b3d6a" opacity=".85"/>
+  <ellipse cx="82" cy="114" rx="28" ry="27" fill="#f4f1e8" stroke="#1f2a1a" stroke-width="5"/>
+  <circle cx="90" cy="118" r="6" fill="#1f2a1a"/>
+  <path d="M52 84 q22 -10 44 -2" fill="none" stroke="#1f2a1a" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- olho robô: lente vermelha acesa -->
+  <circle cx="178" cy="114" r="40" fill="url(#glow)"/>
+  <circle cx="178" cy="114" r="28" fill="#2a333b" stroke="#1f2a1a" stroke-width="5"/>
+  <circle cx="178" cy="114" r="17" fill="url(#led)"/>
+  <circle cx="172" cy="108" r="4" fill="#fff" opacity=".9"/>
+
+  <!-- boca: dentes tortos no lado zumbi, grade no lado robô -->
+  <path d="M74 176 Q128 168 186 172 Q190 200 128 206 Q72 206 74 176 Z" fill="#2a1414" stroke="#1f2a1a" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M84 176 l16 -1 l-1 17 l-14 -2 Z M104 175 l15 0 l-1 12 l-13 1 Z" fill="#f2ecd8" stroke="#1f2a1a" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M110 205 l2 -14 l14 1 l0 13 Z" fill="#f2ecd8" stroke="#1f2a1a" stroke-width="3" stroke-linejoin="round"/>
+  <g stroke="#9eabb6" stroke-width="5" stroke-linecap="round">
+    <line x1="142" y1="176" x2="142" y2="200"/><line x1="156" y1="175" x2="156" y2="198"/><line x1="170" y1="175" x2="170" y2="194"/>
+  </g>
+</svg></div><div><b>PZ Mod Manager</b><span>Project Zomboid · B42</span></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="grow"></div>
+    <div class="gamebox" id="gamebox"></div>
+  </aside>
+  <main class="main">
+    <header class="top">
+      <h1 id="title">Painel</h1>
+      <div class="sp"></div>
+      <span class="savechip" id="savechip"></span>
+      <div class="profile">Perfil de mods <select id="profileSel" title="Onde os mods serão ativados"></select></div>
+      <button class="btn ghost sm" id="refreshBtn" title="Recarregar e buscar atualizações no Workshop">⟳</button>
+    </header>
+    <section class="content" id="content"><div class="empty"><span class="spin"></span><br><br>Carregando…</div></section>
+  </main>
+</div>
+<div class="toasts" id="toasts"></div>
+<div id="queueBox"></div>
+<div id="modalBox"></div>
+
+<script>
+"use strict";
+const ZB_ID = "3619862853", VP_ID = "3809306528";
+const ICONS = {
+  dash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+  mods:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 7l9 5 9-5-9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg>',
+  rec:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>',
+  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18M8 3v18M16 3v18"/><rect x="6" y="10" width="4" height="4" fill="currentColor" stroke="none"/></svg>',
+  srv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>',
+};
+const VIEWS = [
+  {id:"dash", label:"Painel"},
+  {id:"mods", label:"Mods"},
+  {id:"map", label:"Conflitos"},
+  {id:"rec", label:"Recomendados"},
+  {id:"srv", label:"Servidores"},
+];
+
+/* ---------- ponte com o C# ---------- */
+let seq = 0; const waiting = new Map();
+function call(cmd, args = {}, timeoutMs = 90000) {
+  return new Promise((res, rej) => {
+    const id = ++seq;
+    const timer = setTimeout(() => {
+      if (!waiting.has(id)) return;
+      waiting.delete(id);
+      rej(new Error(`A operação "${cmd}" demorou demais. Talvez o antivírus esteja verificando arquivos do jogo; tente de novo em instantes.`));
+    }, timeoutMs);
+    waiting.set(id, {res: v => { clearTimeout(timer); res(v); }, rej: e => { clearTimeout(timer); rej(e); }});
+    window.chrome.webview.postMessage(JSON.stringify({id, cmd, args}));
+  });
+}
+window.chrome.webview.addEventListener("message", e => {
+  const m = JSON.parse(e.data);
+  if (m.event) { onEvent(m.event, m.data); return; }
+  const w = waiting.get(m.id); if (!w) return; waiting.delete(m.id);
+  m.ok ? w.res(m.data) : w.rej(new Error(m.error || "erro"));
+});
+
+/* ---------- utilidades ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("pzmm." + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("pzmm." + k, JSON.stringify(v)); } catch {} },
+};
+function ago(unix) {
+  if (!unix) return "—";
+  const s = Date.now() / 1000 - unix;
+  if (s < 3600) return Math.max(1, Math.round(s / 60)) + " min atrás";
+  if (s < 86400) return Math.round(s / 3600) + " h atrás";
+  if (s < 86400 * 30) return Math.round(s / 86400) + " dias atrás";
+  return new Date(unix * 1000).toLocaleDateString("pt-BR");
+}
+const fmtN = n => n == null ? "" : n >= 1e6 ? (n / 1e6).toFixed(1).replace(".", ",") + " mi" : n >= 1e3 ? Math.round(n / 1e3) + " mil" : String(n);
+// URL para url('...') em style: o HTML decodifica &#39; antes do CSS, então aspas/parênteses viram %xx
+const cssUrl = u => /^https:\/\//i.test(u || "") ? encodeURI(u).replace(/['()]/g, c => "%" + c.charCodeAt(0).toString(16)) : "";
+const thumbUrl = (u, w = 160, h = 160) => u ? u + (u.includes("?") ? "&" : "?") + `imw=${w}&imh=${h}&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true` : null;
+function cmpVer(a, b) {
+  const pa = String(a).split(".").map(x => parseInt(x) || 0), pb = String(b).split(".").map(x => parseInt(x) || 0);
+  for (let i = 0; i < 3; i++) { const d = (pa[i] || 0) - (pb[i] || 0); if (d) return d; }
+  return 0;
+}
+function toast(text, kind = "info", ms = 4200) {
+  const el = document.createElement("div");
+  el.className = "toast " + kind; el.innerHTML = text;
+  $("#toasts").appendChild(el);
+  setTimeout(() => el.remove(), ms);
+}
+function modal(title, body, okText = "Confirmar", cancelText = "Cancelar", danger = false) {
+  return new Promise(res => {
+    const box = $("#modalBox"), before = document.activeElement;
+    box.innerHTML = `<div class="modalbg"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><h3 id="modalTitle">${esc(title)}</h3><div class="mb">${body}</div>
+      <div class="mf">${cancelText ? `<button class="btn" data-m="0">${esc(cancelText)}</button>` : ""}
+      <button class="btn ${danger ? "" : "primary"}" data-m="1">${esc(okText)}</button></div></div></div>`;
+    const close = ok => { document.removeEventListener("keydown", key, true); box.innerHTML = ""; before?.focus?.(); res(ok); };
+    const key = e => {
+      if (e.key === "Escape") { e.preventDefault(); close(false); return; }
+      if (e.key !== "Tab") return;
+      const f = [...box.querySelectorAll("button,input,select,a,[tabindex]")].filter(x => !x.disabled);
+      if (!f.length) return;
+      const i = f.indexOf(document.activeElement);
+      if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && (i < 0 || i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
+    };
+    document.addEventListener("keydown", key, true);
+    box.querySelectorAll("[data-m]").forEach(b => b.onclick = () => close(b.dataset.m === "1"));
+    box.querySelector('[data-m="1"]').focus();
+  });
+}
+
+/* ---------- estado ---------- */
+let S = null;                    // estado vindo do C#
+let P = {key: store.get("profile", "default"), type: "default", active: [], maps: [], workshopItems: [], exists: false};
+let view = store.get("view", "dash");
+let REC = null, recLoading = false, recCat = "all";
+let filter = "all", search = "", expanded = new Set(), modsItemFilter = null;
+let pendingActivate = new Set(store.get("pending", []));
+let Q = store.get("queue", null);  // fila de inscrição {ids, i}
+let setupMode = false, remoteBusy = false;
+const I = {modsById: new Map(), modByKey: new Map(), items: new Map()};
+
+function buildIndex() {
+  I.modsById = new Map(); I.modByKey = new Map(); I.items = new Map();
+  for (const it of S.items) I.items.set(it.id, it);
+  // mods do Workshop primeiro, locais depois (o primeiro de cada ID é o "principal")
+  const sorted = [...S.mods].sort((a, b) => (a.source === "local") - (b.source === "local"));
+  for (const m of sorted) {
+    I.modByKey.set(m.key, m);
+    if (!I.modsById.has(m.id)) I.modsById.set(m.id, []);
+    I.modsById.get(m.id).push(m);
+  }
+}
+const primary = id => I.modsById.get(id)?.[0] || null;
+const itemOf = m => m?.workshopId ? I.items.get(m.workshopId) : null;
+const modName = id => primary(id)?.name || id;
+const itemTitle = id => I.items.get(id)?.title || S?.titles?.[id] || REC?.items?.find(x => x.id === id)?.title || ("Item " + id);
+function itemMods(wid) { const it = I.items.get(wid); return it ? it.modKeys.map(k => I.modByKey.get(k)).filter(Boolean) : []; }
+function mainMod(ms) { return ms.length <= 1 ? ms[0] : [...ms].sort((a, b) => a.id.length - b.id.length)[0]; }
+
+/** dependências de um mod: require= do mod.info + "Required items" da página do Workshop */
+function depsOf(id) {
+  const m = primary(id);
+  if (!m) return {ids: [], missingItems: []};
+  const ids = new Set(m.requires);
+  const missingItems = [];
+  for (const r of itemOf(m)?.requiredItems || []) {
+    if (!I.items.has(r.id)) { missingItems.push(r); continue; }
+    const ms = itemMods(r.id);
+    if (!ms.length || ms.some(x => ids.has(x.id))) continue;
+    ids.add(mainMod(ms).id);
+  }
+  ids.delete(id);
+  return {ids: [...ids], missingItems};
+}
+function needsZB(m) {
+  if (!m) return false;
+  if (m.id.toLowerCase() === "zombiebuddy") return true;
+  if (m.requires.some(r => r.toLowerCase() === "zombiebuddy")) return true;
+  return (itemOf(m)?.requiredItems || []).some(r => r.id === ZB_ID);
+}
+
+/** ordem de carregamento: dependências antes, respeitando loadModAfter/Before, mantendo a ordem atual quando possível */
+function computeOrder(list) {
+  const ids = [...new Set(list)];
+  const pos = new Map(ids.map((x, i) => [x, i])), inSet = new Set(ids);
+  const out = new Map(ids.map(x => [x, new Set()])), indeg = new Map(ids.map(x => [x, 0]));
+  const edge = (a, b) => { if (a === b || !inSet.has(a) || !inSet.has(b) || out.get(a).has(b)) return; out.get(a).add(b); indeg.set(b, indeg.get(b) + 1); };
+  for (const id of ids) {
+    const m = primary(id); if (!m) continue;
+    for (const r of depsOf(id).ids) edge(r, id);
+    for (const a of m.loadAfter) edge(a, id);
+    for (const b of m.loadBefore) edge(id, b);
+  }
+  const res = [], ready = ids.filter(x => indeg.get(x) === 0);
+  while (ready.length) {
+    ready.sort((a, b) => pos.get(a) - pos.get(b));
+    const x = ready.shift(); res.push(x);
+    for (const y of out.get(x)) { indeg.set(y, indeg.get(y) - 1); if (indeg.get(y) === 0) ready.push(y); }
+  }
+  for (const x of ids) if (!res.includes(x)) res.push(x); // ciclo: mantém como está
+  return res;
+}
+
+const OBS_NAME = /(obsolete|deprecated|discontinued|abandoned|unmaintained|no longer (needed|required|maintained|supported|updated)|not needed)|obsolet|descontinuad|abandonad/i;
+const OBS_DESC = /(this mod is (now )?(obsolete|deprecated|discontinued|no longer (needed|maintained|updated))|no longer (maintained|updated|supported))/i;
+/** memória recomendada: metade da RAM, deixando 4 GB livres, até 8 GB */
+/* ---------- memória do jogo ---------- */
+const MEM_MIN = 2048, MEM_STEP = 512;
+const gb = mb => (mb / 1024).toLocaleString("pt-BR", {maximumFractionDigits: 1}) + " GB";
+// teto = RAM - 4 GB (mesma regra do C#, GameMemory.Set)
+const memMax = () => Math.max(MEM_MIN, Math.floor((S.memory.totalMb - 4096) / MEM_STEP) * MEM_STEP);
+/** Estimativa do que os mods ativos pedem. Calibrada no caso real: 88 mods + Java + mapa gigante
+ *  estouraram com 3 GB e rodaram com 8 GB. shortcut: heurística, trocar por medição se o jogo expuser uso de heap. */
+function memNeed() {
+  const ms = P.active.map(primary).filter(Boolean);
+  const maps = ms.filter(m => m.hasMaps).length, java = ms.filter(m => needsZB(m)).length;
+  return {mb: 2048 + 40 * P.active.length + 1024 * Math.min(maps, 3) + (java ? 1024 : 0), mods: P.active.length, maps, java};
+}
+const recMem = () => Math.max(Math.min(memMax(), Math.max(3072, Math.ceil(memNeed().mb / 1024) * 1024)),
+                              Math.min(3072, S.memory.xmxMb)); // PC com pouca RAM: não sugerir abaixo dos 3 GB de fábrica
+/** RAM baixa demais para subir acima do padrão do jogo com segurança (o Windows precisa de 4 GB). */
+const memLowRam = () => memMax() <= Math.min(3072, S.memory.xmxMb);
+function memLevel(v) {
+  const need = memNeed().mb, free = S.memory.totalMb - v;
+  if (v < need * 0.75) return {cls: "err", t: "Insuficiente", d: "Alto risco de o jogo fechar ou travar ao carregar o mundo (falta de memória, como aconteceu com 3 GB)."};
+  if (v < need) return {cls: "warn", t: "Apertado", d: "Deve abrir, mas pode engasgar e travar em áreas grandes ou depois de jogar por muito tempo."};
+  if (free < 6144) return {cls: "warn", t: "Sobra pouca RAM", d: `Ficam só ${gb(free)} para o Windows, a Steam, o navegador e a parte do jogo fora do Java: o PC pode ficar lento.`};
+  if (v >= need * 1.75 && v > 8192) return {cls: "info", t: "Além do necessário", d: "Funciona, mas não deixa o jogo mais rápido: só tira memória do resto do PC."};
+  return {cls: "ok", t: "Bom", d: `Suficiente para os mods ativos e ainda sobram ${gb(free)} para o resto do PC.`};
+}
+// valor na barra: o que o usuário está arrastando; senão, o recomendado se o jogo ainda está no padrão de fábrica (3 GB)
+let memDraft = null;
+const memValue = () => memDraft ?? (S.memory.xmxMb <= 3072 && recMem() > S.memory.xmxMb ? recMem() : Math.min(S.memory.xmxMb, memMax()));
+function memCard() {
+  const m = S.memory;
+  if (!m?.xmxMb) return "";
+  if (memLowRam()) {
+    const lv = memLevel(m.xmxMb);
+    return `<div class="card" id="memCard">
+      <h2>Memória do jogo</h2>
+      <div class="memtop"><b>${gb(m.xmxMb)}</b><span class="badge ${lv.cls}">${lv.t}</span></div>
+      <div class="memdesc" style="margin-top:8px">Este PC tem ${gb(m.totalMb)} de RAM: não dá para dar mais memória ao jogo com segurança, porque o Windows precisa de pelo menos 4 GB.
+      Se o jogo travar ao carregar o mundo, desative mapas grandes e mods Java (aba Mods).</div>
+    </div>`;
+  }
+  const v = memValue(), max = memMax(), rec = recMem(), need = memNeed(), lv = memLevel(v);
+  const pct = x => Math.max(0, Math.min(100, (x - MEM_MIN) / (max - MEM_MIN) * 100)).toFixed(1);
+  const a = pct(need.mb * 0.75), b = pct(need.mb), c = pct(m.totalMb - 6144);
+  const track = `linear-gradient(90deg,#e5534bb0 0 ${a}%,#e3a63bb0 ${a}% ${b}%,#4fb477b0 ${b}% ${c}%,#e3a63bb0 ${c}% 100%)`;
+  const ticks = [MEM_MIN, ...[4096, 8192, 12288, 16384, 24576, 32768].filter(x => x < max - 1024), max];
+  const what = [`${need.mods} mods ativos`, need.java ? `${need.java} com Java` : "", need.maps ? `${need.maps} com mapa` : ""].filter(Boolean).join(", ");
+  const pending = v !== m.xmxMb;
+  return `<div class="card" id="memCard">
+    <h2>Memória do jogo</h2>
+    <div class="sub">Quanto da RAM (${gb(m.totalMb)}) o Project Zomboid pode usar. ${esc(what)}: pedem cerca de <b>${gb(need.mb)}</b>.</div>
+    <div class="memtop"><b id="memVal">${gb(v)}</b><span class="badge ${lv.cls}" id="memBadge">${lv.t}</span><span class="cur">configurado hoje: <b style="font-size:inherit">${gb(m.xmxMb)}</b></span></div>
+    <input type="range" class="mem" id="memRange" min="${MEM_MIN}" max="${max}" step="${MEM_STEP}" value="${v}" style="--track:${track}"
+      aria-label="Memória do jogo" aria-valuetext="${gb(v)}, ${lv.t}">
+    <div class="memscale">${ticks.map(x => `<span style="left:${pct(x)}%">${gb(x)}</span>`).join("")}
+      <span class="rec" style="left:${pct(rec)}%">recomendado</span></div>
+    <div class="memdesc" id="memDesc">${esc(lv.d)}</div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn primary sm" data-a="memApply" id="memApply" ${pending && !S.env.gameRunning ? "" : "disabled"}>Aplicar ${gb(v)}</button>
+      ${v !== rec ? `<button class="btn sm" data-a="memRec">Usar recomendado (${gb(rec)})</button>` : ""}
+      ${S.env.gameRunning ? `<span class="badge warn">Feche o jogo para aplicar</span>`
+        : m.xmxMb > max ? `<span class="badge warn">Hoje está em ${gb(m.xmxMb)}, acima do limite seguro (${gb(max)})</span>`
+        : pending && !memDraft && m.xmxMb <= 3072 ? `<span class="badge info">O jogo ainda está no padrão de 3 GB</span>` : ""}
+    </div>
+    <div class="note">Vale na próxima vez que o jogo abrir. Uma atualização do jogo pode voltar para 3 GB: se isso acontecer, o app avisa aqui.</div>
+  </div>`;
+}
+/** Aviso mostrado ao abrir o app, até o usuário marcar "Não exibir novamente". */
+async function memIntro() {
+  if (store.get("memIntroHidden", false) || !S.memory?.xmxMb || memLowRam()) return; // sem como ajustar: não oferecer
+  const lv = memLevel(S.memory.xmxMb);
+  // ilustração simples da barra (estática, só para reconhecer o controle no Painel)
+  const img = `<svg viewBox="0 0 440 74" width="100%" role="img" aria-label="Ilustração da barra de memória" style="display:block;margin:12px 0 4px">
+<defs><linearGradient id="mi" x1="0" x2="1"><stop offset="0" stop-color="#e5534b"/><stop offset=".2" stop-color="#e5534b"/><stop offset=".2" stop-color="#e3a63b"/><stop offset=".4" stop-color="#e3a63b"/><stop offset=".4" stop-color="#4fb477"/><stop offset=".8" stop-color="#4fb477"/><stop offset=".8" stop-color="#e3a63b"/><stop offset="1" stop-color="#e3a63b"/></linearGradient></defs>
+<rect x="0" y="0" width="440" height="74" rx="10" fill="#181b1e" stroke="#2d3338"/>
+<text x="16" y="24" fill="#e7e9eb" font-size="15" font-weight="700" font-family="Segoe UI">8 GB</text>
+<rect x="58" y="11" width="34" height="17" rx="4" fill="#173323" stroke="#24503a"/><text x="75" y="23.5" fill="#8fdcae" font-size="10.5" font-weight="600" text-anchor="middle" font-family="Segoe UI">Bom</text>
+<rect x="16" y="38" width="408" height="9" rx="4.5" fill="url(#mi)" opacity=".75"/>
+<circle cx="228" cy="42.5" r="10" fill="#fff" stroke="#3a4148" stroke-width="4"/>
+<text x="16" y="66" fill="#6c757d" font-size="10" font-family="Segoe UI">2 GB</text>
+<text x="228" y="66" fill="#8fdcae" font-size="10" font-weight="600" text-anchor="middle" font-family="Segoe UI">recomendado</text>
+<text x="424" y="66" fill="#6c757d" font-size="10" text-anchor="end" font-family="Segoe UI">máx.</text></svg>`;
+  const body = `O Project Zomboid vem limitado a <b>3 GB de RAM</b>. Com muitos mods, mapas grandes ou mods Java (como o Viewpoint), isso costuma faltar: o jogo trava ou fecha sozinho ao carregar o mundo, com o erro <i>OutOfMemoryError</i>.` +
+    `\n\nAgora dá para ajustar isso aqui no app, no card <b>Memória do jogo</b> do Painel: arraste a barra, veja se o valor fica bom para os seus mods e clique em <b>Aplicar</b>.${img}` +
+    `<span style="color:var(--muted);font-size:12.5px">Hoje: <b style="color:var(--text)">${gb(S.memory.xmxMb)}</b> · <span class="badge ${lv.cls}">${lv.t}</span> · recomendado para os seus mods: <b style="color:var(--text)">${gb(recMem())}</b></span>` +
+    `\n<label style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="memIntroHide"> Não exibir novamente</label>`;
+  if (!await modal("Memória (RAM) do jogo", body, "Ajustar agora", "Fechar")) return;
+  setView("dash");
+  const card = $("#memCard");
+  card?.scrollIntoView({block: "center", behavior: "smooth"});
+  $("#memRange")?.focus({preventScroll: true});
+}
+
+/** Atualiza só os textos do card enquanto arrasta (re-renderizar soltaria a barra). */
+function memInput(v) {
+  memDraft = v;
+  const lv = memLevel(v);
+  $("#memVal").textContent = gb(v);
+  $("#memBadge").className = "badge " + lv.cls; $("#memBadge").textContent = lv.t;
+  $("#memDesc").textContent = lv.d;
+  $("#memRange").setAttribute("aria-valuetext", `${gb(v)}, ${lv.t}`);
+  const ap = $("#memApply"); ap.textContent = "Aplicar " + gb(v); ap.disabled = v === S.memory.xmxMb || S.env.gameRunning;
+}
+
+/* ---------- conflitos (pontos que 2+ mods ativos alteram) ---------- */
+let CF = null, cfLoading = false, cfTab = "att", cfMap = false, cfOpen = new Set(), cfFocus = null;
+const cfIgnored = new Set(store.get("cfIgnored", []));
+const cfStable = p => [p.a, p.b].sort().join("|");
+const cfKey = () => P.key + "|" + P.active.join(",");
+async function loadConflicts() {
+  const k = cfKey();
+  if (cfLoading || CF?.k === k) return;
+  cfLoading = true;
+  try { CF = {k, list: await call("getConflicts", {keys: P.active.map(id => primary(id)?.key).filter(Boolean)}, 180000)}; }
+  catch (e) { CF = {k, list: []}; toast("Não foi possível varrer os conflitos: " + esc(e.message), "warn"); }
+  finally { cfLoading = false; render(); }
+}
+/** Map "a|b" -> {a, b, points:[{kind, name}]}; b é o que carrega depois (vence). */
+function conflictPairs() {
+  const act = new Set(P.active), pairs = new Map();
+  const push = (x, y, pt) => {
+    const [a, b] = P.active.indexOf(x) < P.active.indexOf(y) ? [x, y] : [y, x], k = a + "|" + b;
+    if (!pairs.has(k)) pairs.set(k, {a, b, points: []});
+    pairs.get(k).points.push(pt);
+  };
+  for (const o of S.overlaps.concat(CF?.list || [])) {
+    const ms = [...new Set(o.mods.map(k => I.modByKey.get(k)).filter(m => m && act.has(m.id) && primary(m.id) === m).map(m => m.id))];
+    for (let i = 0; i < ms.length; i++) for (let j = i + 1; j < ms.length; j++) push(ms[i], ms[j], {kind: o.kind || "file", name: o.file});
+  }
+  for (const id of P.active) for (const x of primary(id)?.incompatible || [])
+    if (act.has(x) && x !== id) push(id, x, {kind: "incompat", name: `${modName(id)} declara incompatibilidade com ${modName(x)}`});
+  return pairs;
+}
+
+/** problemas do perfil atual */
+function analyze() {
+  const issues = [], per = new Map();
+  const act = new Set(P.active);
+  const add = (id, sev, text, fix, tag) => { const it = {id, sev, text, fix, tag}; issues.push(it); if (id) { if (!per.has(id)) per.set(id, []); per.get(id).push(it); } };
+  const game = S.env.gameVersion || "42.0";
+  const zbNeeded = [];
+  for (const id of P.active) {
+    const m = primary(id);
+    if (!m) { add(id, "warn", `"${id}" está na lista, mas não está instalado.`, {type: "remove", id, label: "Remover da lista"}); continue; }
+    const d = depsOf(id);
+    for (const r of d.ids) {
+      if (act.has(r)) continue;
+      if (I.modsById.has(r)) add(id, "err", `Precisa de "${modName(r)}", que está desativado.`, {type: "activate", id: r, label: "Ativar"});
+      else {
+        const cand = (itemOf(m)?.requiredItems || []).filter(x => !I.items.has(x.id)).map(x => x.id);
+        add(id, "err", `Precisa do mod "${r}", que não está instalado.`,
+            cand.length ? {type: "subscribe", ids: cand, label: "Inscrever"} : {type: "search", q: r, label: "Procurar no Workshop"});
+      }
+    }
+    for (const mi of d.missingItems)
+      if (!issues.some(x => x.fix?.type === "subscribe" && x.id === id && x.fix.ids.includes(mi.id)))
+        add(id, "err", `Precisa do item "${mi.title}" do Workshop (não inscrito).`, {type: "subscribe", ids: [mi.id], label: "Inscrever"});
+    for (const x of m.incompatible)
+      if (act.has(x)) add(id, "err", `Incompatível com "${modName(x)}".`, {type: "deactivate", id: x, label: "Desativar " + modName(x)});
+    if (!m.b42Ok) add(id, "warn", "Não tem pasta para o Build 42: provavelmente é só para o B41 e o jogo vai ignorá-lo.", null, "obs");
+    if (m.versionMin && cmpVer(game, m.versionMin) < 0) add(id, "err", `Exige o jogo na versão ${m.versionMin} ou mais nova (você tem ${game}).`);
+    if (m.versionMax && cmpVer(game, m.versionMax) > 0) add(id, "warn", `Feito para até a versão ${m.versionMax} (você tem ${game}): obsoleto para esta versão.`, null, "obs");
+    const it = itemOf(m);
+    if (it?.removed) add(id, "warn", "Não está mais disponível no Workshop (removido ou oculto).", null, "obs");
+    if (OBS_NAME.test(`${m.name} ${it?.title || ""}`) || OBS_DESC.test(`${m.description} ${it?.shortDesc || ""}`))
+      add(id, "warn", "Marcado pelo autor como obsoleto/descontinuado (no nome ou na descrição). Veja a página: talvez outro mod o substitua.", null, "obs");
+    else if (m.versionMax && cmpVer(game, m.versionMax) <= 0 && game.split(".").slice(0, 2).join(".") === m.versionMax.split(".").slice(0, 2).join("."))
+      add(id, "info", `Feito para até a versão ${m.versionMax}: deve parar de funcionar na próxima atualização do jogo.`, null, "soon");
+    else if (it?.remoteTimeUpdated && nowSec() - it.remoteTimeUpdated > 365 * 86400)
+      add(id, "info", `Sem atualização há mais de 1 ano (${ago(it.remoteTimeUpdated)}): pode estar abandonado e quebrar numa atualização do jogo.`, null, "soon");
+    if (it?.outdated) add(id, "info", "Há atualização no Workshop. A Steam baixa sozinha; se demorar, abra os downloads da Steam.", {type: "downloads", label: "Downloads da Steam"});
+    if (needsZB(m) && S.zb.state !== "ok") zbNeeded.push(id);
+    if ((I.modsById.get(id) || []).length > 1) add(id, "info", `Este ID existe em ${I.modsById.get(id).length} lugares (Workshop/local). O jogo usa só um.`);
+  }
+  if (zbNeeded.length) {
+    const zbFix = S.zb.state === "not_subscribed" ? {type: "subscribe", ids: [ZB_ID], label: "Inscrever"}
+      : {type: "zbInstall", label: S.zb.state === "needs_repair" ? "Reparar ZombieBuddy" : "Instalar ZombieBuddy"};
+    const it = {id: null, sev: "err", text: `${zbNeeded.length === 1 ? `"${modName(zbNeeded[0])}" precisa` : `${zbNeeded.length} mods precisam`} do ZombieBuddy instalado no jogo. ${S.zb.message}`, fix: zbFix};
+    issues.unshift(it);
+    for (const id of zbNeeded) { if (!per.has(id)) per.set(id, []); per.get(id).push({...it, id}); }
+  }
+  // pontos alterados por mais de um mod ativo (arquivos; scripts e mapas quando a aba Conflitos já varreu)
+  let nPairs = 0;
+  for (const p of conflictPairs().values()) {
+    const pts = p.points.filter(x => x.kind !== "incompat");
+    if (!pts.length) continue;
+    nPairs++;
+    add(p.a, "info", `Pode conflitar com "${modName(p.b)}": os dois alteram ${pts.length} ponto(s) (ex.: ${pts[0].name.split("/").pop()}). Vale o de "${modName(p.b)}", que carrega por último.`);
+  }
+  if (nPairs) add(null, "info", `${nPairs} par(es) de mods ativos alteram os mesmos pontos (o último a carregar vence).`, {type: "map", label: "Ver mapa de conflitos"});
+  // memória do Java: o padrão (3 GB) estoura com mapas grandes e muitos mods (OutOfMemoryError ao carregar o mundo)
+  const mem = S.memory;
+  if (mem?.xmxMb && mem.xmxMb < memNeed().mb * 0.75 && recMem() > mem.xmxMb)
+    issues.unshift({id: null, sev: "err", text: `O jogo só pode usar ${mem.xmxMb / 1024} GB de memória. Com ${P.active.length} mods (mapas/Java), ele costuma fechar ou travar ao carregar o mundo (OutOfMemoryError).`,
+      fix: {type: "memory", mb: recMem(), label: `Usar ${gb(recMem())}`}});
+  const sorted = computeOrder(P.active);
+  if (sorted.join("|") !== P.active.join("|")) add(null, "info", "A ordem de carregamento pode ser ajustada para respeitar dependências.", {type: "sort", label: "Ajustar ordem"});
+  return {issues, per,
+    err: issues.filter(i => i.sev === "err").length,
+    warn: issues.filter(i => i.sev === "warn").length};
+}
+
+/* ---------- carregar ---------- */
+async function loadState(redetect = false) {
+  S = await call("getState", {redetect});
+  buildIndex();
+  if (!S.profiles.some(p => p.key === P.key)) { P.key = "default"; dirty = false; }
+  if (!dirty) await loadProfile(P.key); // não descarta mudança ainda não salva
+}
+async function loadProfile(key) {
+  const d = await call("getProfile", {key});
+  P = {key, type: d.type, active: d.active, maps: d.maps, workshopItems: d.workshopItems, exists: d.exists};
+  store.set("profile", key);
+}
+async function fetchRemote(force = false) {
+  if (remoteBusy) return;
+  remoteBusy = true; renderTop();
+  try { await call("fetchRemote", {force}); await loadState(); afterChange(); }
+  catch (e) { toast("Não foi possível consultar o Workshop: " + esc(e.message), "warn"); }
+  finally { remoteBusy = false; render(); }
+}
+
+/* ---------- salvar ---------- */
+let saveTimer = null, dirty = false;
+function scheduleSave() {
+  dirty = true;
+  clearTimeout(saveTimer);
+  $("#savechip").className = "savechip"; $("#savechip").textContent = "Salvando…";
+  saveTimer = setTimeout(saveProfile, 350);
+}
+async function saveProfile() {
+  P.active = computeOrder(P.active);
+  const args = {key: P.key, active: P.active};
+  if (P.type === "server") {
+    const ws = new Set();
+    for (const id of P.active) { const m = primary(id); if (m?.workshopId) ws.add(m.workshopId); }
+    for (const w of P.workshopItems) if (!I.items.has(w)) ws.add(w); // mantém itens que não temos localmente
+    args.workshopItems = P.workshopItems = [...ws];
+    // mapas de mods: entram antes do mapa base
+    const managed = new Set(S.mods.flatMap(m => m.mapNames));
+    const wanted = [...new Set(P.active.flatMap(id => primary(id)?.mapNames || []))];
+    let maps = P.maps.filter(x => !managed.has(x) || wanted.includes(x));
+    for (const w of [...wanted].reverse()) if (!maps.includes(w)) maps.unshift(w);
+    if (!maps.length) maps = ["Muldraugh, KY"];
+    if (maps.join(";") !== P.maps.join(";")) args.maps = P.maps = maps;
+  }
+  try {
+    await call("saveProfile", args);
+    dirty = false;
+    P.exists = true;
+    $("#savechip").className = "savechip ok"; $("#savechip").textContent = "✓ Salvo";
+    setTimeout(() => { if ($("#savechip").textContent === "✓ Salvo") $("#savechip").textContent = ""; }, 2500);
+    if (S.env.gameRunning) toast("O jogo está aberto: as mudanças valem quando você reiniciar o jogo (ou recarregar o save).", "warn", 6000);
+  } catch (e) {
+    $("#savechip").textContent = "";
+    toast("Erro ao salvar: " + esc(e.message), "err", 7000);
+  }
+  render();
+}
+
+/* ---------- ativar / desativar ---------- */
+async function setActive(id, on, quiet = false) {
+  const act = new Set(P.active);
+  if (on) {
+    const added = [], missing = [];
+    const visit = x => {
+      if (act.has(x)) return;
+      if (!I.modsById.has(x)) { missing.push(x); return; }
+      act.add(x); added.push(x);
+      for (const r of depsOf(x).ids) visit(r);
+    };
+    visit(id);
+    const conflicts = [...act].filter(a => !added.includes(a) && added.some(n =>
+      (primary(n)?.incompatible || []).includes(a) || (primary(a)?.incompatible || []).includes(n)));
+    if (conflicts.length) {
+      const ok = await modal("Mods incompatíveis",
+        `"${esc(modName(id))}" é incompatível com:\n• ${conflicts.map(c => esc(modName(c))).join("\n• ")}\n\nDesativar esses e continuar?`, "Desativar e continuar");
+      if (!ok) return false;
+      conflicts.forEach(c => act.delete(c));
+    }
+    P.active = P.active.filter(x => act.has(x)).concat(added.filter(x => !P.active.includes(x)));
+    if (!quiet) {
+      const extra = added.filter(x => x !== id);
+      if (extra.length) toast(`Ativado <b>${esc(modName(id))}</b> + dependências: ${extra.map(x => esc(modName(x))).join(", ")}`, "ok");
+      if (missing.length) toast(`Faltam mods necessários: ${missing.map(esc).join(", ")}. Veja a aba Mods.`, "warn", 6000);
+    }
+  } else {
+    // quem depende deste (direta ou indiretamente)
+    const dependents = new Set();
+    let grew = true;
+    while (grew) {
+      grew = false;
+      for (const a of act) {
+        if (a === id || dependents.has(a)) continue;
+        if (depsOf(a).ids.some(d => d === id || dependents.has(d))) { dependents.add(a); grew = true; }
+      }
+    }
+    if (dependents.size) {
+      const ok = await modal("Outros mods precisam deste",
+        `Estes mods precisam de "${esc(modName(id))}":\n• ${[...dependents].map(d => esc(modName(d))).join("\n• ")}\n\nDesativar todos?`, "Desativar todos");
+      if (!ok) return false;
+      dependents.forEach(d => act.delete(d));
+    }
+    act.delete(id);
+    P.active = P.active.filter(x => act.has(x));
+  }
+  scheduleSave(); render();
+  return true;
+}
+
+async function activateItem(wid) {
+  const ms = itemMods(wid);
+  if (!ms.length) { toast("Este item não tem mods reconhecidos.", "warn"); return; }
+  if (ms.length === 1) return setActive(ms[0].id, true);
+  // vários mods no mesmo item (variantes): deixa o usuário escolher
+  modsItemFilter = wid; setView("mods");
+  toast(`"${esc(itemTitle(wid))}" tem ${ms.length} mods. Escolha quais ativar.`, "info", 6000);
+}
+async function deactivateItem(wid) {
+  for (const m of itemMods(wid)) if (P.active.includes(m.id)) if (!await setActive(m.id, false)) return;
+}
+const itemActive = wid => itemMods(wid).some(m => P.active.includes(m.id));
+
+/* ---------- inscrição (fila) ---------- */
+function openWorkshop(id) { call("open", {url: "steam://url/CommunityFilePage/" + id}); }
+// ST = status lido dos logs da Steam (inscrições registradas e fila de downloads)
+let ST = null, pendingSince = store.get("pendingSince", 0), stBusy = false;
+const nowSec = () => Math.floor(Date.now() / 1000);
+const isSubscribed = id => I.items.has(id) || !!ST?.subscribed?.includes(id);
+const waitingIds = () => [...pendingActivate].filter(id => !I.items.has(id));
+
+function startQueue(ids, autoActivate = true) {
+  ids = [...new Set(ids)].filter(id => !I.items.has(id));
+  if (!ids.length) { toast("Você já está inscrito em tudo isso.", "ok"); return; }
+  if (!waitingIds().length || !pendingSince) { pendingSince = nowSec() - 30; store.set("pendingSince", pendingSince); }
+  if (autoActivate) ids.forEach(i => pendingActivate.add(i));
+  store.set("pending", [...pendingActivate]);
+  Q = {ids, i: 0}; store.set("queue", Q);
+  openWorkshop(ids[0]);
+  render(); pollSteam();
+}
+function queueNext() {
+  if (!Q) return;
+  Q.i++;
+  while (Q.i < Q.ids.length && isSubscribed(Q.ids[Q.i])) Q.i++;
+  if (Q.i >= Q.ids.length) { finishQueue(); return; }
+  store.set("queue", Q); openWorkshop(Q.ids[Q.i]); render();
+}
+function finishQueue() {
+  Q = null; store.set("queue", null);
+  render();
+}
+function stopWaiting() {
+  for (const id of waitingIds()) pendingActivate.delete(id);
+  store.set("pending", [...pendingActivate]);
+  render();
+}
+
+/** Lê os logs da Steam enquanto houver inscrição em andamento ou download esperado. */
+async function pollSteam() {
+  if (stBusy || (!Q && !waitingIds().length)) return;
+  stBusy = true;
+  try {
+    ST = await call("steamStatus", {since: pendingSince || nowSec() - 3600}, 20000);
+    // a Steam registrou a inscrição do item atual: abre o próximo sozinho
+    if (Q && isSubscribed(Q.ids[Q.i])) {
+      toast(`✓ Inscrito em <b>${esc(itemTitle(Q.ids[Q.i]))}</b>.`, "ok", 3000);
+      queueNext();
+    } else render();
+  } catch { /* silencioso: tenta de novo no próximo ciclo */ }
+  finally { stBusy = false; }
+}
+setInterval(pollSteam, 3000);
+
+/** Texto do estado do download de um item (ou da fila em geral). */
+function steamWaitText(id) {
+  if (id && !isSubscribed(id)) return {short: "Aguardando inscrição", long: "A Steam ainda não registrou a inscrição. Na página que abriu, clique em <b>Inscrever-se</b>."};
+  const st = ST?.pzState;
+  if (st === "downloading") return {short: "Baixando…", long: "A Steam está baixando agora."};
+  if (st === "suspended") return {short: "Download pausado", long: "O download está <b>pausado</b> na Steam. Abra os Downloads e retome."};
+  if (st === "queued" && ST?.busyAppName) return {short: "Na fila da Steam",
+    long: `A Steam baixa um item por vez e está ocupada com <b>${esc(ST.busyAppName)}</b>. Em Downloads, clique na seta <b>⬆</b> do Project Zomboid para baixar primeiro.`};
+  if (st === "queued") return {short: "Na fila da Steam", long: "Está na fila de downloads da Steam."};
+  return {short: "Esperando a Steam", long: "Inscrição registrada. A Steam deve começar o download em instantes (às vezes só ao abrir o jogo)."};
+}
+
+function renderQueue() {
+  const box = $("#queueBox");
+  if (Q) {
+    const id = Q.ids[Q.i], done = Q.ids.filter(isSubscribed).length;
+    box.innerHTML = `<div class="queue">
+      <b>Inscrição ${Q.i + 1} de ${Q.ids.length}: ${esc(itemTitle(id))}</b>
+      <div class="bar"><i style="width:${Math.round(done / Q.ids.length * 100)}%"></i></div>
+      <p>Na página que abriu na Steam, clique em <b>Inscrever-se</b>. Assim que a Steam registrar, eu sigo sozinho.</p>
+      <div class="row"><button class="btn sm" data-a="qopen">Abrir de novo</button>
+      <button class="btn ghost sm" data-a="qnext">Pular</button><span style="flex:1"></span>
+      <button class="btn ghost sm" data-a="qcancel">Cancelar</button></div></div>`;
+    return;
+  }
+  const wait = waitingIds();
+  if (!wait.length) { box.innerHTML = ""; return; }
+  const w = steamWaitText(wait.find(x => !isSubscribed(x)) || null);
+  box.innerHTML = `<div class="queue">
+    <b>${wait.length === 1 ? `Aguardando a Steam baixar "${esc(itemTitle(wait[0]))}"` : `Aguardando a Steam baixar ${wait.length} mods`}</b>
+    <p style="margin:6px 0 8px">${w.long}</p>
+    ${wait.length > 1 ? `<p style="font-size:12px">${wait.map(x => esc(itemTitle(x))).join(" · ")}</p>` : ""}
+    <p style="font-size:12px">Quando chegar, ativo sozinho em <b>${esc(profLabel())}</b>.</p>
+    <div class="row"><button class="btn primary sm" data-a="downloads">Downloads da Steam</button><span style="flex:1"></span>
+    <button class="btn ghost sm" data-a="stopWait">Parar de esperar</button></div></div>`;
+}
+
+/* ---------- depois de cada mudança no disco ---------- */
+async function afterChange() {
+  // ativa automaticamente o que acabou de ser baixado
+  for (const wid of [...pendingActivate]) {
+    if (!I.items.has(wid)) continue;
+    pendingActivate.delete(wid);
+    const ms = itemMods(wid);
+    if (ms.length === 1 && !P.active.includes(ms[0].id)) {
+      await setActive(ms[0].id, true, true);
+      toast(`✓ <b>${esc(itemTitle(wid))}</b> baixado e ativado.`, "ok");
+    } else if (ms.length > 1) toast(`<b>${esc(itemTitle(wid))}</b> baixado. Ele tem ${ms.length} mods: escolha na aba Mods.`, "info", 6000);
+  }
+  store.set("pending", [...pendingActivate]);
+  // avança a fila
+  if (Q) {
+    let moved = false;
+    while (Q.i < Q.ids.length && isSubscribed(Q.ids[Q.i])) { Q.i++; moved = true; }
+    if (Q.i >= Q.ids.length) finishQueue();
+    else if (moved) { store.set("queue", Q); openWorkshop(Q.ids[Q.i]); }
+  }
+  if (!waitingIds().length && pendingSince) { pendingSince = 0; store.set("pendingSince", 0); }
+  renderQueue();
+  if (setupMode) runSetup();
+}
+
+/* ---------- Configurar Viewpoint em 1 clique ---------- */
+function vpStatus() {
+  const vpMods = itemMods(VP_ID), zbMods = itemMods(ZB_ID);
+  const vpMain = mainMod(vpMods);
+  const ess = REC?.curated?.filter(c => c.group === "essential") || [];
+  return {
+    zbSub: I.items.has(ZB_ID),
+    zbInst: S.zb.state === "ok",
+    vpSub: I.items.has(VP_ID),
+    active: !!vpMain && P.active.includes(vpMain.id) && zbMods.some(m => P.active.includes(m.id)),
+    vpMain,
+    essTotal: ess.length,
+    essHave: ess.filter(c => I.items.has(c.id)).length,
+  };
+}
+async function runSetup() {
+  const st = vpStatus();
+  if (!st.zbSub || !st.vpSub) {
+    if (!Q) startQueue([ZB_ID, VP_ID].filter(x => !I.items.has(x)), true);
+    setupMode = true; render(); return;
+  }
+  if (!st.zbInst) {
+    if (S.env.gameRunning) { setupMode = false; toast("Feche o Project Zomboid para instalar o ZombieBuddy.", "warn", 6000); render(); return; }
+    if (zbBusy) return;
+    zbBusy = true; render();
+    try {
+      const ch = await call("zbInstall");
+      toast("ZombieBuddy instalado:<br>• " + ch.map(esc).join("<br>• "), "ok", 6500);
+      await loadState();
+    } catch (e) { setupMode = false; zbBusy = false; toast("Falha ao instalar o ZombieBuddy: " + esc(e.message), "err", 8000); render(); return; }
+    zbBusy = false;
+  }
+  const st2 = vpStatus();
+  if (!st2.active && st2.vpMain) {
+    await setActive(st2.vpMain.id, true, true);
+    for (const m of itemMods(ZB_ID)) if (!P.active.includes(m.id)) await setActive(m.id, true, true);
+  }
+  setupMode = false;
+  render();
+  await modal("Tudo pronto!",
+    `ZombieBuddy e Project Viewpoint estão instalados e ativos no perfil <b>${esc(profLabel())}</b>.\n\n` +
+    `Ao abrir o jogo:\n• O ZombieBuddy vai perguntar se pode carregar o Java do Viewpoint: clique em <b>Sim</b> e depois em <b>salvar a decisão</b>.\n` +
+    `• No menu principal, o texto "ZombieBuddy … loaded" no canto superior esquerdo confirma que funcionou.\n• Dentro do jogo: <b>O</b> liga a primeira pessoa e <b>Delete</b> abre as opções do Viewpoint.\n\n` +
+    `Quer ver os addons recomendados?`, "Ver recomendados", "Fechar").then(ok => ok && setView("rec"));
+}
+
+/* ---------- ações ---------- */
+async function doFix(fix) {
+  switch (fix.type) {
+    case "activate": return setActive(fix.id, true);
+    case "deactivate": return setActive(fix.id, false);
+    case "remove": P.active = P.active.filter(x => x !== fix.id); scheduleSave(); render(); return;
+    case "subscribe": return startQueue(fix.ids, true);
+    case "search": return call("open", {url: "https://steamcommunity.com/workshop/browse/?appid=108600&searchtext=" + encodeURIComponent(fix.q)});
+    case "downloads": return call("open", {url: "steam://open/downloads"});
+    case "zb": return setView("dash");
+    case "zbInstall": return zbAction("install");
+    case "sort": P.active = computeOrder(P.active); scheduleSave(); render(); return;
+    case "memory": return setMemory(fix.mb);
+    case "map": return setView("map");
+  }
+}
+async function fixAll() {
+  let n = 0; const subs = [];
+  // ZombieBuddy primeiro (recarrega o estado)
+  if (analyze().issues.some(i => i.fix?.type === "zbInstall")) {
+    if (S.env.gameRunning) toast("Feche o jogo para instalar o ZombieBuddy.", "warn");
+    else {
+      clearTimeout(saveTimer); if (dirty) await saveProfile();
+      zbBusy = true; render();
+      try { await call("zbInstall"); n++; await loadState(); } catch (e) { toast(esc(e.message), "err", 7000); }
+      finally { zbBusy = false; }
+    }
+  }
+  const A = analyze();
+  for (const i of A.issues) {
+    if (!i.fix) continue;
+    if (i.fix.type === "activate" && !P.active.includes(i.fix.id)) { await setActive(i.fix.id, true, true); n++; }
+    else if (i.fix.type === "remove") { P.active = P.active.filter(x => x !== i.fix.id); n++; }
+    else if (i.fix.type === "subscribe") subs.push(...i.fix.ids);
+  }
+  P.active = computeOrder(P.active); scheduleSave();
+  if (subs.length) startQueue(subs, true);
+  toast(n || subs.length ? `Corrigido: ${n} item(ns)${subs.length ? `; ${subs.length} para inscrever` : ""}. Incompatibilidades ficam para você decidir.` : "Nada para corrigir automaticamente.", n || subs.length ? "ok" : "info");
+  render();
+}
+let zbBusy = false;
+async function setMemory(mb) {
+  if (S.env.gameRunning) { toast("Feche o Project Zomboid antes de mudar a memória.", "warn", 6000); render(); return; }
+  try {
+    await call("setMemory", {mb});
+    memDraft = null;
+    toast(`Memória do jogo: <b>${gb(mb)}</b>. Vale na próxima vez que abrir o jogo.`, "ok", 6000);
+    await loadState();
+  } catch (e) { toast(esc(e.message), "err", 7000); }
+  render();
+}
+async function zbAction(kind) {
+  if (kind === "subscribe") return startQueue([ZB_ID], true);
+  if (zbBusy) return;
+  if (S.env.gameRunning) { toast("Feche o Project Zomboid antes de mexer no ZombieBuddy.", "warn", 6000); return; }
+  zbBusy = true; render();
+  try {
+    if (kind === "uninstall") {
+      if (!await modal("Remover ZombieBuddy", "Isto apaga zbNative.dll e ZombieBuddy.jar da pasta do jogo e tira o -agentlib:zbNative do lançador.\nMods Java (como o Viewpoint) deixam de funcionar.", "Remover", "Cancelar", true)) return;
+      const ch = await call("zbUninstall");
+      toast("• " + ch.map(esc).join("<br>• "), "ok", 6500);
+    } else {
+      const ch = await call("zbInstall");
+      toast("ZombieBuddy:<br>• " + ch.map(esc).join("<br>• "), "ok", 6500);
+    }
+    await loadState();
+  } catch (e) { toast(esc(e.message), "err", 7000); }
+  finally { zbBusy = false; render(); }
+}
+async function copyFrom(key) {
+  if (!key || key === P.key) return;
+  const d = await call("getProfile", {key});
+  const lbl = S.profiles.find(p => p.key === key)?.label || key;
+  if (!await modal("Copiar lista de mods", `Substituir os ${P.active.length} mods de "${esc(profLabel())}" pelos ${d.active.length} de "${esc(lbl)}"?`, "Copiar")) return;
+  P.active = d.active.filter(Boolean);
+  scheduleSave(); render();
+}
+function setView(v) { view = v; store.set("view", v); $("#content").scrollTop = 0; render(); if (v === "rec") loadRec(); }
+const profLabel = () => S?.profiles.find(p => p.key === P.key)?.label || P.key;
+
+async function loadRec(force = false) {
+  if (recLoading || (REC && !force)) return;
+  recLoading = true; if (view === "rec") render();
+  try { REC = await call("getRecommended", {force}); }
+  catch (e) { toast("Não foi possível carregar os recomendados: " + esc(e.message), "warn"); }
+  recLoading = false; render();
+}
+
+/* ---------- eventos ---------- */
+async function onEvent(name) {
+  if (name === "changed") {
+    try { CF = null; await loadState(); await afterChange(); render(); }
+    catch (e) { toast(esc(e.message), "warn", 6000); }
+  }
+}
+document.addEventListener("click", async e => {
+  const t = e.target.closest("[data-a]"); if (!t) return;
+  const a = t.dataset.a, v = t.dataset.v;
+  switch (a) {
+    case "nav": return setView(v);
+    case "play": return call("open", {url: "steam://rungameid/108600"});
+    case "downloads": return call("open", {url: "steam://open/downloads"});
+    case "ws": return call("open", {url: "https://steamcommunity.com/sharedfiles/filedetails/?id=" + v});
+    case "wsSteam": return openWorkshop(v);
+    case "folder": return call("openFolder", {path: v}).catch(err => toast(esc(err.message), "err"));
+    case "setup": setupMode = true; return runSetup();
+    case "zb": return zbAction(v);
+    case "sub": return startQueue([v], true);
+    case "subMany": return startQueue(v.split(","), true);
+    case "actItem": return activateItem(v);
+    case "deactItem": return deactivateItem(v);
+    case "fix": { const A = analyze(); const i = A.issues[+v]; if (i?.fix) await doFix(i.fix); return; }
+    case "fixAll": return fixAll();
+    case "filter": filter = v; modsItemFilter = null; return render();
+    case "clearItemFilter": modsItemFilter = null; return render();
+    case "expand": if (e.target.closest(".tog,button,a")) return; expanded.has(v) ? expanded.delete(v) : expanded.add(v); return render();
+    case "qnext": return queueNext();
+    case "qopen": return Q && openWorkshop(Q.ids[Q.i]);
+    case "qcancel": return finishQueue();
+    case "stopWait": return stopWaiting();
+    case "recCat": recCat = v; return render();
+    case "cfTab": cfTab = v; return render();
+    case "memApply": return setMemory(memValue());
+    case "memRec": memDraft = recMem(); return render();
+    case "cfMap": cfMap = !cfMap; return render();
+    case "cfDet": cfOpen.has(v) ? cfOpen.delete(v) : cfOpen.add(v); return render();
+    case "cfCell": { const [x, y] = v.split("|"); const p = conflictPairs().get(v); if (!p) return;
+      const k = cfStable(p), info = cfInfo(p); cfTab = cfIgnored.has(k) ? "ign" : info.sev === "ok" ? "ok" : "att"; cfOpen.add(k); cfFocus = k; return render(); }
+    case "cfIgnore": cfIgnored.has(v) ? cfIgnored.delete(v) : cfIgnored.add(v); store.set("cfIgnored", [...cfIgnored]); return render();
+    case "cfOff": return setActive(v, false);
+    case "cfWin": {
+      // faz "v" carregar logo depois do outro mod do par: o último a carregar vence
+      const other = t.dataset.o, arr = P.active.filter(x => x !== v);
+      arr.splice(arr.indexOf(other) + 1, 0, v);
+      P.active = arr; scheduleSave(); render();
+      return toast(`Agora <b>${esc(modName(v))}</b> carrega depois de <b>${esc(modName(other))}</b> e vence onde os dois se cruzam.`, "ok");
+    }
+    case "recRefresh": return loadRec(true);
+    case "editSrv": await switchProfile(v); return setView("mods");
+    case "disableAll":
+      if (await modal("Desativar todos", `Desativar os ${P.active.length} mods de "${esc(profLabel())}"?`, "Desativar", "Cancelar", true)) { P.active = []; scheduleSave(); render(); }
+      return;
+  }
+});
+document.addEventListener("change", async e => {
+  const t = e.target;
+  if (t.dataset.tog) { t.checked = !t.checked; await setActive(t.dataset.tog, !P.active.includes(t.dataset.tog)); }
+  if (t.id === "profileSel") await switchProfile(t.value);
+  if (t.id === "copyFrom") { await copyFrom(t.value); t.value = ""; }
+  if (t.id === "memIntroHide") store.set("memIntroHidden", t.checked);
+
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "memRange") return memInput(+e.target.value);
+  if (e.target.id === "search") { search = e.target.value; renderList(); }
+});
+async function switchProfile(key) {
+  if (dirty) { clearTimeout(saveTimer); await saveProfile(); }
+  await loadProfile(key); expanded.clear(); render();
+}
+$("#refreshBtn").onclick = async () => { await loadState(true); render(); fetchRemote(true); if (view === "rec") loadRec(true); };
+
+/* ---------- renderização ---------- */
+function render() {
+  if (!S) return;
+  renderNav(); renderTop(); renderGamebox();
+  const c = $("#content");
+  const st = c.scrollTop;
+  c.innerHTML = view === "dash" ? viewDash() : view === "mods" ? viewMods() : view === "rec" ? viewRec() : view === "map" ? viewMap() : viewSrv();
+  c.scrollTop = st;
+  if (view === "mods") renderList();
+  if (view === "map" && cfFocus) { document.getElementById("cf-" + cfFocus)?.scrollIntoView({block: "center", behavior: "smooth"}); cfFocus = null; }
+  renderQueue();
+  if (zbBusy) document.querySelectorAll('[data-a="zb"],[data-a="setup"],[data-a="zbInstall"]').forEach(b => {
+    b.disabled = true; if (b.tagName === "BUTTON") b.innerHTML = '<span class="spin"></span> Aguarde…';
+  });
+}
+function renderNav() {
+  const A = analyze();
+  $("#nav").innerHTML = VIEWS.map(v => {
+    let badge = "";
+    if (v.id === "mods" && (A.err || A.warn)) badge = `<span class="count ${A.err ? "" : "warn"}">${A.err || A.warn}</span>`;
+    if (v.id === "map") { const n = [...conflictPairs().values()].filter(p => !cfIgnored.has(cfStable(p)) && ["err", "warn"].includes(cfInfo(p).sev)).length;
+      if (n) badge = `<span class="count ${[...conflictPairs().values()].some(p => !cfIgnored.has(cfStable(p)) && cfInfo(p).sev === "err") ? "" : "warn"}">${n}</span>`; }
+    if (v.id === "dash" && S.zb.state !== "ok" && I.items.has(ZB_ID)) badge = `<span class="count warn">!</span>`;
+    return `<button class="${view === v.id ? "on" : ""}" data-a="nav" data-v="${v.id}">${ICONS[v.id]}${v.label}${badge}</button>`;
+  }).join("");
+  $("#title").textContent = VIEWS.find(v => v.id === view).label;
+}
+function renderTop() {
+  const sel = $("#profileSel");
+  const groups = {};
+  for (const p of S.profiles) (groups[p.group] ??= []).push(p);
+  sel.innerHTML = Object.entries(groups).map(([g, ps]) => `<optgroup label="${esc(g)}">${ps.map(p =>
+    `<option value="${esc(p.key)}" ${p.key === P.key ? "selected" : ""}>${esc(p.label)}</option>`).join("")}</optgroup>`).join("");
+  $("#refreshBtn").innerHTML = remoteBusy ? '<span class="spin"></span>' : "⟳";
+}
+function renderGamebox() {
+  const e = S.env;
+  $("#gamebox").innerHTML = `
+    <div class="row"><span>Jogo</span><b>${e.gamePath ? "B" + esc(e.gameVersion || "?") : "não encontrado"}</b></div>
+    <div class="row"><span>Steam</span><b style="color:${e.steamRunning ? "var(--ok)" : "var(--warn)"}">${e.steamRunning ? "aberta" : "fechada"}</b></div>
+    <div class="row"><span>Mods ativos</span><b>${P.active.length}</b></div>
+    <button class="btn ${e.gameRunning ? "" : "primary"} play" data-a="play" ${e.gameRunning || !e.gamePath ? "disabled" : ""}>${e.gameRunning ? "Jogo aberto" : "▶  Jogar"}</button>`;
+}
+
+function viewDash() {
+  const st = vpStatus(), zb = S.zb, A = analyze();
+  const vpPrev = I.items.get(VP_ID)?.preview || REC?.items?.find(x => x.id === VP_ID)?.preview;
+  const steps = [
+    {done: st.zbSub, t: "Inscrever no ZombieBuddy", d: "Carregador Java exigido pelo Viewpoint", btn: !st.zbSub && `<button class="btn sm" data-a="sub" data-v="${ZB_ID}">Inscrever</button>`},
+    {done: st.zbInst, t: zb.state === "needs_repair" ? "Reparar o ZombieBuddy no jogo" : zb.state === "needs_update" ? "Atualizar o ZombieBuddy no jogo" : "Instalar o ZombieBuddy no jogo",
+     d: zb.state === "needs_repair" || zb.state === "needs_update" ? esc(zb.message) : "Copia 2 arquivos e configura o lançador",
+     btn: st.zbSub && !st.zbInst && `<button class="btn sm" data-a="zb" data-v="install">${zb.state === "needs_repair" ? "Reparar" : zb.state === "needs_update" ? "Atualizar" : "Instalar"}</button>`},
+    {done: st.vpSub, t: "Inscrever no Project Viewpoint", d: "Primeira e terceira pessoa em 3D", btn: !st.vpSub && `<button class="btn sm" data-a="sub" data-v="${VP_ID}">Inscrever</button>`},
+    {done: st.active, t: "Ativar no perfil atual", d: esc(profLabel()), btn: st.vpSub && st.zbSub && !st.active && `<button class="btn sm" data-a="setup">Ativar</button>`},
+  ];
+  const firstOpen = steps.findIndex(s => !s.done);
+  const allDone = firstOpen < 0;
+  const outdated = S.items.filter(i => i.outdated);
+  const zbChecks = [
+    [zb.subscribed, "Inscrito no Workshop" + (zb.workshopVersion ? ` (v${esc(zb.workshopVersion)})` : "")],
+    [zb.filesInGame, "zbNative.dll e ZombieBuddy.jar na pasta do jogo"],
+    [zb.jsonPatched || zb.steamLaunchOption, "Lançador configurado (-agentlib:zbNative)" + (zb.steamLaunchOption ? " · também nas opções da Steam" : "")],
+    [zb.filesInGame && (zb.jarUpToDate || zb.updatePending), zb.updatePending ? "Atualização pendente: aplicada ao abrir o jogo" : "Versão do jogo igual à do Workshop"],
+  ];
+  const zbBtn = {
+    not_subscribed: `<button class="btn primary" data-a="zb" data-v="subscribe">Inscrever no Workshop</button>`,
+    not_installed: `<button class="btn primary" data-a="zb" data-v="install">Instalar</button>`,
+    needs_repair: `<button class="btn primary" data-a="zb" data-v="install">Reparar</button>`,
+    needs_update: `<button class="btn primary" data-a="zb" data-v="install">Atualizar</button>`,
+  }[zb.state] || "";
+  return `
+  <div class="hero">
+    ${vpPrev ? `<div class="bgimg" style="background-image:url('${esc(cssUrl(vpPrev))}')"></div>` : ""}
+    <h2>${allDone ? "Project Viewpoint pronto para jogar" : "Configurar o Project Viewpoint"}</h2>
+    <p>${allDone ? "ZombieBuddy instalado e Viewpoint ativo. Veja os addons recomendados para completar a experiência."
+      : "Um clique faz tudo: abre a Steam para você se inscrever, instala o ZombieBuddy no jogo e ativa os mods no perfil escolhido."}</p>
+    <div class="steps">${steps.map((s, i) => `<div class="step ${s.done ? "done" : i === firstOpen ? "cur" : ""}">
+      <div class="ic">${s.done ? "✓" : i + 1}</div><div class="tx"><b>${s.t}</b><span>${s.d}</span></div>${s.btn || ""}</div>`).join("")}
+      <div class="step ${st.essTotal && st.essHave === st.essTotal ? "done" : ""}"><div class="ic">${st.essTotal && st.essHave === st.essTotal ? "✓" : "★"}</div>
+      <div class="tx"><b>Addons essenciais (opcional)</b><span>${REC ? `${st.essHave} de ${st.essTotal} inscritos` : "Correções e modelos 3D recomendados"}</span></div>
+      <button class="btn sm" data-a="nav" data-v="rec">Ver</button></div>
+    </div>
+    ${allDone ? `<button class="btn primary lg" data-a="play" ${S.env.gameRunning ? "disabled" : ""}>▶  Jogar</button>`
+      : `<button class="btn primary lg" data-a="setup" ${setupMode ? "disabled" : ""}>${setupMode ? '<span class="spin"></span> Configurando…' : "Configurar tudo"}</button>`}
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    ${memCard()}
+
+    <div class="card">
+      <h2>ZombieBuddy</h2>
+      <div class="sub">${esc(zb.message)}</div>
+      <div class="checks">${zbChecks.map(([ok, t]) => `<div class="chk"><span class="dot ${ok ? "ok" : zb.state === "not_subscribed" ? "" : "err"}"></span>${t}</div>`).join("")}</div>
+      <div class="row">${zbBtn}
+        ${zb.filesInGame ? `<button class="btn ghost sm" data-a="zb" data-v="uninstall">Remover</button>` : ""}
+        <a style="margin-left:auto;font-size:12px" data-a="ws" data-v="${ZB_ID}">Página no Workshop</a></div>
+      <div class="note">Mods Java têm acesso total ao PC. O ZombieBuddy pergunta antes de carregar cada um; o app mantém essa proteção ligada.
+      ${zb.approvalsFile ? `<br><a data-a="folder" data-v="${esc(zb.approvalsFile)}">Ver aprovações salvas</a>` : ""}</div>
+    </div>
+
+    <div class="card">
+      <h2>Perfil: ${esc(profLabel())}</h2>
+      <div class="sub">${P.type === "server" ? "Configuração de servidor (Hospedar)" : P.type === "save" ? "Mods deste save" : "Mods usados ao criar um jogo novo"}</div>
+      <div class="statline">
+        <div class="stat"><b>${P.active.length}</b><span>ativos</span></div>
+        <div class="stat ${A.err ? "err" : "ok"}"><b>${A.err}</b><span>problemas</span></div>
+        <div class="stat ${A.warn ? "warn" : ""}"><b>${A.warn}</b><span>avisos</span></div>
+        <div class="stat ${outdated.length ? "warn" : ""}"><b>${outdated.length}</b><span>com atualização</span></div>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn" data-a="nav" data-v="mods">Gerenciar mods</button>
+        ${A.err || A.warn ? `<button class="btn" data-a="fixAll">Corrigir automaticamente</button>` : ""}
+        ${outdated.length ? `<button class="btn" data-a="downloads">Downloads da Steam</button>` : ""}
+      </div>
+      <div class="note">A Steam atualiza sozinha os mods inscritos (inclusive o ZombieBuddy). Este app vigia a pasta do Workshop, avisa quando algo muda e reaplica a configuração do ZombieBuddy se uma atualização do jogo a apagar.</div>
+    </div>
+
+    <div class="card">
+      <h2>Instalação</h2>
+      <div class="sub">Detectado automaticamente</div>
+      <div class="kv">
+        <span>Jogo</span><code>${esc(S.env.gamePath || "não encontrado")}</code>
+        <span>Versão</span><code>${esc(S.env.gameVersion || "?")} (build ${esc(S.env.buildId || "?")})</code>
+        <span>Workshop</span><code>${esc(S.env.workshopPath || "—")}</code>
+        <span>Dados</span><code>${esc(S.env.zomboidPath)}</code>
+      </div>
+      <div class="row" style="margin-top:14px">
+        ${S.env.gamePath ? `<button class="btn sm" data-a="folder" data-v="${esc(S.env.gamePath)}">Pasta do jogo</button>` : ""}
+        ${S.env.workshopPath ? `<button class="btn sm" data-a="folder" data-v="${esc(S.env.workshopPath)}">Pasta do Workshop</button>` : ""}
+        <button class="btn sm" data-a="folder" data-v="${esc(S.env.zomboidPath)}">Pasta Zomboid</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function modsCounts(A) {
+  const all = S.mods.filter(m => primary(m.id) === m);
+  return {
+    all: all.length,
+    on: all.filter(m => P.active.includes(m.id)).length + P.active.filter(id => !I.modsById.has(id)).length,
+    off: all.filter(m => !P.active.includes(m.id)).length,
+    prob: new Set(A.issues.filter(i => i.id && i.sev !== "info").map(i => i.id)).size,
+    obs: new Set(A.issues.filter(i => i.id && i.tag).map(i => i.id)).size,
+  };
+}
+function viewMods() {
+  const A = analyze(), n = modsCounts(A);
+  const shown = A.issues.filter(i => i.sev !== "info" || i.fix).slice(0, 40);
+  const others = S.profiles.filter(p => p.key !== P.key);
+  return `
+  ${shown.length ? `<div class="issues"><div class="hd"><b>${A.err ? `${A.err} problema(s)` : ""}${A.err && A.warn ? " · " : ""}${A.warn ? `${A.warn} aviso(s)` : ""}${!A.err && !A.warn ? "Sugestões" : ""}</b>
+    <button class="btn sm primary" data-a="fixAll">Corrigir automaticamente</button></div>
+    ${shown.map(i => `<div class="issue"><span class="badge ${i.sev}">${i.sev === "err" ? "Erro" : i.sev === "warn" ? "Aviso" : "Dica"}</span>
+      ${i.id ? `<span class="who" title="${esc(modName(i.id))}">${esc(modName(i.id))}</span>` : ""}<span class="tx">${esc(i.text)}</span>
+      ${i.fix ? `<button class="btn sm" data-a="fix" data-v="${A.issues.indexOf(i)}">${esc(i.fix.label)}</button>` : ""}</div>`).join("")}</div>` : ""}
+  <div class="toolbar">
+    <input type="text" id="search" spellcheck="false" placeholder="Buscar por nome, ID ou item…" value="${esc(search)}">
+    <div class="chips">
+      ${[["all", "Todos", n.all], ["on", "Ativos", n.on], ["off", "Inativos", n.off], ["prob", "Com problema", n.prob], ["obs", "Obsoletos", n.obs]].map(([k, l, c]) =>
+        `<button class="chip ${filter === k && !modsItemFilter ? "on" : ""}" data-a="filter" data-v="${k}">${l}<span class="n">${c}</span></button>`).join("")}
+      ${modsItemFilter ? `<button class="chip on" data-a="clearItemFilter">${esc(itemTitle(modsItemFilter))} ✕</button>` : ""}
+    </div>
+    <span style="flex:1"></span>
+    ${others.length ? `<select id="copyFrom" style="min-width:0"><option value="">Copiar lista de…</option>${others.map(p => `<option value="${esc(p.key)}">${esc(p.label)}</option>`).join("")}</select>` : ""}
+    ${P.active.length ? `<button class="btn ghost sm" data-a="disableAll">Desativar todos</button>` : ""}
+  </div>
+  <div class="list" id="list"></div>`;
+}
+function renderList() {
+  const el = $("#list"); if (!el) return;
+  const A = analyze();
+  const q = search.trim().toLowerCase();
+  const act = new Set(P.active);
+  let mods = S.mods.filter(m => primary(m.id) === m);
+  // IDs ativos que não estão instalados aparecem como "fantasmas"
+  const ghosts = P.active.filter(id => !I.modsById.has(id)).map(id => ({id, key: "ghost\\" + id, name: id, ghost: true, requires: [], incompatible: [], mapNames: []}));
+  mods = mods.concat(ghosts);
+  if (modsItemFilter) mods = mods.filter(m => m.workshopId === modsItemFilter);
+  else if (filter === "on") mods = mods.filter(m => act.has(m.id));
+  else if (filter === "off") mods = mods.filter(m => !act.has(m.id));
+  else if (filter === "prob") mods = mods.filter(m => (A.per.get(m.id) || []).some(i => i.sev !== "info"));
+  else if (filter === "obs") mods = mods.filter(m => (A.per.get(m.id) || []).some(i => i.tag));
+  if (q) mods = mods.filter(m => (m.name + " " + m.id + " " + (itemTitle(m.workshopId) || "") + " " + (m.workshopId || "")).toLowerCase().includes(q));
+  mods.sort((a, b) => {
+    const ia = P.active.indexOf(a.id), ib = P.active.indexOf(b.id);
+    if (ia >= 0 && ib >= 0) return ia - ib;
+    if (ia >= 0) return -1; if (ib >= 0) return 1;
+    return a.name.localeCompare(b.name, "pt-BR");
+  });
+  if (!mods.length) {
+    el.innerHTML = S.mods.length ? `<div class="empty"><b>Nenhum mod aqui</b>Ajuste a busca ou o filtro.</div>`
+      : `<div class="empty"><b>Nenhum mod instalado ainda</b>Inscreva-se em mods no Workshop (ou use a aba Recomendados) e eles aparecem aqui sozinhos.</div>`;
+    return;
+  }
+  el.innerHTML = mods.map(m => modRow(m, A, act)).join("");
+}
+function modRow(m, A, act) {
+  const on = act.has(m.id), it = m.ghost ? null : itemOf(m);
+  const iss = A.per.get(m.id) || [];
+  const errs = iss.filter(i => i.sev === "err").length, warns = iss.filter(i => i.sev === "warn").length;
+  const pos = P.active.indexOf(m.id);
+  const b = [];
+  if (m.ghost) b.push(`<span class="badge warn">não instalado</span>`);
+  if (errs) b.push(`<span class="badge err">${errs} erro${errs > 1 ? "s" : ""}</span>`);
+  if (warns) b.push(`<span class="badge warn">${warns} aviso${warns > 1 ? "s" : ""}</span>`);
+  if (it?.outdated) b.push(`<span class="badge info">atualização</span>`);
+  if (needsZB(m) && m.id !== "ZombieBuddy") b.push(`<span class="badge java">Java</span>`);
+  if (m.hasMaps) b.push(`<span class="badge">mapa</span>`);
+  if (!m.ghost && !m.b42Ok) b.push(`<span class="badge warn">só B41?</span>`);
+  else if (iss.some(i => i.tag === "obs")) b.push(`<span class="badge warn">obsoleto</span>`);
+  else if (iss.some(i => i.tag === "soon")) b.push(`<span class="badge" title="Pode ficar obsoleto em breve">vai ficar obsoleto?</span>`);
+  if (m.source === "local") b.push(`<span class="badge">local</span>`);
+  const thumb = it?.preview ? `<img class="thumb" loading="lazy" src="${esc(thumbUrl(it.preview, 96, 96))}">` : `<div class="thumb ph">${esc((m.name || "?").slice(0, 2).toUpperCase())}</div>`;
+  const sub = [m.id !== m.name ? m.id : null, it?.title && it.title !== m.name ? it.title : null, it?.remoteTimeUpdated ? "atualizado " + ago(it.remoteTimeUpdated) : null].filter(Boolean).map(esc).join(" · ");
+  const open = expanded.has(m.key);
+  return `<div class="mod ${on ? "active" : ""}">
+    <div class="line" data-a="expand" data-v="${esc(m.key)}">
+      <label class="tog" title="${on ? "Desativar" : "Ativar"}"><input type="checkbox" data-tog="${esc(m.id)}" ${on ? "checked" : ""}><i></i></label>
+      <span class="ord">${pos >= 0 ? "#" + (pos + 1) : ""}</span>
+      ${thumb}
+      <div class="nm"><b>${esc(m.name)}</b><span>${sub}</span></div>
+      <div class="bdg">${b.join("")}</div>
+    </div>
+    ${open ? modDetail(m, iss, A) : ""}
+  </div>`;
+}
+function modDetail(m, iss, A) {
+  if (m.ghost) return `<div class="det">Este ID está na lista de mods ativos, mas nenhum mod instalado usa esse ID.
+    <div class="row"><button class="btn sm" data-a="fix" data-v="${A.issues.findIndex(i => i.id === m.id && i.fix?.type === "remove")}">Remover da lista</button></div></div>`;
+  const it = itemOf(m), act = new Set(P.active);
+  const d = depsOf(m.id);
+  const pills = (ids, bad) => ids.map(x => `<span class="pill ${act.has(x) ? (bad ? "err" : "ok") : I.modsById.has(x) ? "off" : "err"}">${esc(modName(x))}${I.modsById.has(x) ? "" : " (falta)"}</span>`).join("");
+  const dependents = [...act].filter(a => depsOf(a).ids.includes(m.id));
+  return `<div class="det">
+    ${m.description ? `<div class="desc">${esc(m.description)}</div>` : ""}
+    ${iss.length ? `<div>${iss.map(i => `<div class="issue" style="padding:4px 0;border:0"><span class="badge ${i.sev}">${i.sev === "err" ? "Erro" : i.sev === "warn" ? "Aviso" : "Dica"}</span><span class="tx">${esc(i.text)}</span>
+      ${i.fix ? `<button class="btn sm" data-a="fix" data-v="${A.issues.indexOf(i)}">${esc(i.fix.label)}</button>` : ""}</div>`).join("")}</div>` : ""}
+    ${d.ids.length || d.missingItems.length ? `<div><span class="k">Precisa de</span>${pills(d.ids)}${d.missingItems.map(x => `<span class="pill err">${esc(x.title)} (não inscrito)</span>`).join("")}</div>` : ""}
+    ${dependents.length ? `<div><span class="k">Usado por</span>${dependents.map(x => `<span class="pill">${esc(modName(x))}</span>`).join("")}</div>` : ""}
+    ${m.incompatible.length ? `<div><span class="k">Incompatível com</span>${pills(m.incompatible, true)}</div>` : ""}
+    ${m.loadAfter.length ? `<div><span class="k">Carrega depois de</span>${m.loadAfter.map(x => `<span class="pill">${esc(modName(x))}</span>`).join("")}</div>` : ""}
+    ${m.mapNames.length ? `<div><span class="k">Mapas</span>${m.mapNames.map(x => `<span class="pill">${esc(x)}</span>`).join("")}</div>` : ""}
+    <div><span class="k">ID</span><code>${esc(m.id)}</code>${m.versionDir ? ` <span class="k" style="margin-left:10px">Pasta</span><code>${esc(m.versionDir)}</code>` : ""}${m.modVersion ? ` <span class="k" style="margin-left:10px">Versão</span>${esc(m.modVersion)}` : ""}${m.author ? ` <span class="k" style="margin-left:10px">Autor</span>${esc(m.author)}` : ""}</div>
+    <div class="row">
+      ${m.workshopId ? `<button class="btn sm" data-a="ws" data-v="${m.workshopId}">Workshop</button>` : ""}
+      <button class="btn sm" data-a="folder" data-v="${esc(m.path)}">Abrir pasta</button>
+      ${it?.outdated ? `<button class="btn sm" data-a="downloads">Downloads da Steam</button>` : ""}
+    </div>
+  </div>`;
+}
+
+function recCategory(r) {
+  const t = r.tags || [];
+  if (t.includes("Weapons")) return "weap";
+  if (t.includes("Vehicles")) return "veh";
+  if (t.includes("Interface") || t.includes("QOL")) return "ui";
+  if (t.some(x => ["Models", "Textures", "Terrain", "Map"].includes(x))) return "vis";
+  return "other";
+}
+const REC_CATS = [["all", "Todos"], ["vis", "Visual e 3D"], ["ui", "Interface e QOL"], ["weap", "Armas"], ["veh", "Veículos"], ["other", "Outros"]];
+function recCard(r, note) {
+  const inst = I.items.has(r.id), on = inst && itemActive(r.id), pend = pendingActivate.has(r.id) || isSubscribed(r.id);
+  const obsolete = /not needed/i.test(r.title);
+  const cat = REC_CATS.find(c => c[0] === recCategory(r))?.[1];
+  let btn;
+  if (!inst) btn = pend ? `<button class="btn sm" data-a="downloads" data-v="${r.id}" title="Abrir os Downloads da Steam"><span class="spin"></span> ${esc(steamWaitText(r.id).short)}</button>`
+                        : `<button class="btn primary sm" data-a="sub" data-v="${r.id}">Inscrever e ativar</button>`;
+  else btn = on ? `<button class="btn ok sm" data-a="deactItem" data-v="${r.id}" title="Clique para desativar">✓ Ativo</button>`
+                : `<button class="btn sm" data-a="actItem" data-v="${r.id}">Ativar</button>`;
+  return `<div class="rc">
+    <div class="img" style="background-image:url('${esc(cssUrl(r.preview ? r.preview + (r.preview.includes("?") ? "&" : "?") + "imw=512" : ""))}')"><div class="tl">
+      ${inst ? `<span class="badge ok">Inscrito</span>` : ""}${obsolete ? `<span class="badge warn">Obsoleto</span>` : ""}</div></div>
+    <div class="bd"><b>${esc(r.title)}</b>
+      <div class="meta">${fmtN(r.subscriptions)} inscritos · atualizado ${ago(r.timeUpdated)}${cat && !note ? " · " + cat : ""}</div>
+      ${note ? `<div class="nt">${esc(note)}</div>` : r.shortDesc ? `<div class="nt" style="color:var(--muted);font-size:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${esc(r.shortDesc)}</div>` : ""}
+    </div>
+    <div class="ft">${btn}<span class="sp"></span><a style="font-size:12px" data-a="ws" data-v="${r.id}">Workshop ↗</a></div>
+  </div>`;
+}
+function viewRec() {
+  if (!REC) return `<div class="empty"><span class="spin"></span><br><br>Buscando addons do Viewpoint no Workshop…</div>`;
+  const byId = new Map(REC.items.map(r => [r.id, r]));
+  const core = REC.curated.filter(c => c.group === "core" && byId.has(c.id));
+  const ess = REC.curated.filter(c => c.group === "essential" && byId.has(c.id));
+  const curatedIds = new Set(REC.curated.map(c => c.id));
+  let pop = REC.addons.map(id => byId.get(id)).filter(r => r && !curatedIds.has(r.id) && !(r.tags || []).includes("Modding or Configuration"));
+  pop.sort((a, b) => (/not needed/i.test(a.title) - /not needed/i.test(b.title)) || (b.subscriptions - a.subscriptions));
+  const counts = Object.fromEntries(REC_CATS.map(([k]) => [k, k === "all" ? pop.length : pop.filter(r => recCategory(r) === k).length]));
+  if (recCat !== "all") pop = pop.filter(r => recCategory(r) === recCat);
+  const essMissing = ess.filter(c => !I.items.has(c.id) && !isSubscribed(c.id) && !pendingActivate.has(c.id)).map(c => c.id);
+  const coreMissing = core.filter(c => !I.items.has(c.id) && !isSubscribed(c.id)).map(c => c.id);
+  return `
+  <div class="sec"><h3>Base</h3><span>Obrigatórios para o Viewpoint funcionar</span><span class="sp"></span>
+    ${coreMissing.length ? `<button class="btn primary sm" data-a="setup">Configurar tudo</button>` : ""}</div>
+  <div class="rgrid">${core.map(c => recCard(byId.get(c.id), c.note)).join("")}</div>
+  <div class="sec"><h3>Essenciais</h3><span>Correções e modelos 3D que quase todo mundo usa</span><span class="sp"></span>
+    ${essMissing.length ? `<button class="btn primary sm" data-a="subMany" data-v="${essMissing.join(",")}">Inscrever e ativar os ${essMissing.length} que faltam</button>` : `<span class="badge ok">Todos inscritos</span>`}</div>
+  <div class="rgrid">${ess.map(c => recCard(byId.get(c.id), c.note)).join("")}</div>
+  <div class="sec"><h3>Populares da comunidade</h3><span>Addons que dependem do Viewpoint, por número de inscritos</span><span class="sp"></span>
+    <button class="btn ghost sm" data-a="recRefresh">${recLoading ? '<span class="spin"></span>' : "⟳ Atualizar"}</button></div>
+  <div class="chips" style="margin-bottom:14px">${REC_CATS.map(([k, l]) => `<button class="chip ${recCat === k ? "on" : ""}" data-a="recCat" data-v="${k}">${l}<span class="n">${counts[k]}</span></button>`).join("")}</div>
+  <div class="rgrid">${pop.map(r => recCard(r)).join("")}</div>
+  <div class="note" style="margin-top:18px">A lista "Populares" vem ao vivo do Workshop. Itens marcados como <b>Obsoleto</b> dizem no título que não são mais necessários nas versões novas do Viewpoint.
+  Os addons são da comunidade: confira a página de cada um antes de usar em servidor.</div>`;
+}
+
+const CF_SEV = {err: ["err", "Incompatível"], warn: ["warn", "Atenção"], info: ["info", "Só visual"], ok: ["ok", "Esperado"]};
+const plural = (n, um, varios) => n === 1 ? um : varios;
+const exs = (l, n = 2) => l.slice(0, n).map(x => `"${x}"`).join(", ") + (l.length > n ? "…" : "");
+/** Explica em linguagem simples o que o cruzamento de dois mods causa. p.b carrega depois e vence. */
+function cfInfo(p) {
+  const A = modName(p.a), B = modName(p.b);
+  const g = {incompat: [], lua: [], txt: [], item: [], vehicle: [], recipe: [], model: [], other: [], map: []};
+  for (const x of p.points) {
+    if (x.kind === "incompat") g.incompat.push(x.name);
+    else if (x.kind === "map") g.map.push(x.name);
+    else if (x.kind === "file") (x.name.toLowerCase().endsWith(".lua") ? g.lua : g.txt).push(x.name.split("/").pop());
+    else {
+      const m = x.name.match(/^(template \S+|\S+) (.*)$/), t = m[1].toLowerCase(), n = m[2];
+      if (t === "item") g.item.push(n);
+      else if (t.includes("vehicle")) g.vehicle.push(n);
+      else if (["recipe", "craftrecipe", "evolvedrecipe", "fixing"].includes(t)) g.recipe.push(n);
+      else if (t === "model" || t === "sound") g.model.push(n);
+      else g.other.push(n);
+    }
+  }
+  const ma = primary(p.a), mb = primary(p.b);
+  const dep = depsOf(p.b).ids.includes(p.a) ? [B, A] : depsOf(p.a).ids.includes(p.b) ? [A, B] : null;
+  const patch = /patch|compat|fix/i.test(B) ? B : /patch|compat|fix/i.test(A) ? A : null;
+  const ordered = mb?.loadAfter.includes(p.a) || ma?.loadBefore.includes(p.b);
+  const fx = [];
+  if (g.incompat.length) fx.push(`O autor diz que estes mods não funcionam juntos: pode dar erro, travar ou corromper o save.`);
+  if (g.lua.length) fx.push(`${plural(g.lua.length, "Um arquivo de código", g.lua.length + " arquivos de código")} de ${A} ${plural(g.lua.length, "é trocado", "são trocados")} pelo de ${B} (${exs(g.lua)}). Parte do que ${A} faz pode parar de funcionar.`);
+  if (g.item.length) fx.push(`${plural(g.item.length, "Um item existe", g.item.length + " itens existem")} nos dois (${exs(g.item)}): fica a versão de ${B} (peso, dano, aparência, receitas).`);
+  if (g.vehicle.length) fx.push(`${plural(g.vehicle.length, "Um veículo existe", g.vehicle.length + " veículos existem")} nos dois (${exs(g.vehicle)}): fica a versão de ${B}.`);
+  if (g.recipe.length) fx.push(`${plural(g.recipe.length, "Uma receita/conserto existe", g.recipe.length + " receitas/consertos existem")} nos dois (${exs(g.recipe)}): só a de ${B} vale.`);
+  if (g.model.length) fx.push(`${plural(g.model.length, "Um modelo 3D/som existe", g.model.length + " modelos 3D/sons existem")} nos dois: a aparência de ${B} substitui a de ${A}. Normalmente não quebra nada.`);
+  if (g.other.length) fx.push(`${g.other.length} definição(ões) de script em comum (${exs(g.other)}): vale a de ${B}.`);
+  // arquivo de script repetido só importa se não soubermos quais objetos ele define
+  if (g.txt.length && !(g.item.length + g.vehicle.length + g.recipe.length + g.model.length + g.other.length))
+    fx.push(`${plural(g.txt.length, "Um arquivo de script", g.txt.length + " arquivos de script")} de ${A} ${plural(g.txt.length, "é trocado", "são trocados")} pelo de ${B} (${exs(g.txt)}).`);
+  if (g.map.length) fx.push(`Os dois mapas ocupam ${plural(g.map.length, "a mesma célula", g.map.length + " células iguais")} do mundo: ali a construção de ${B} cobre a de ${A} (prédios cortados ou sobrepostos).`);
+  const why = dep ? `${dep[0]} depende de ${dep[1]}: a sobreposição é proposital.`
+    : patch ? `${patch} parece ser um patch/correção do outro: a sobreposição é proposital.`
+    : ordered ? `Os autores já definiram esta ordem de carregamento: a sobreposição é proposital.` : null;
+  const sev = g.incompat.length ? "err" : why ? "ok"
+    : g.lua.length + g.item.length + g.vehicle.length + g.recipe.length + g.map.length + g.other.length || (g.txt.length && !g.model.length) ? "warn" : "info";
+  return {sev, fx, why, g};
+}
+
+function cfCard(p) {
+  const k = cfStable(p), info = cfInfo(p), [cls, label] = CF_SEV[info.sev], ign = cfIgnored.has(k), open = cfOpen.has(k);
+  const A = esc(modName(p.a)), B = esc(modName(p.b)), num = id => P.active.indexOf(id) + 1;
+  const pts = p.points.filter(x => x.kind !== "incompat");
+  return `<div class="cfc ${cls}" id="cf-${esc(k)}">
+    <div class="ch"><span class="badge ${cls}">${label}</span><b>${A}<span>×</span>${B}</b>
+      <button class="btn ghost sm" data-a="cfIgnore" data-v="${esc(k)}" title="${ign ? "Voltar a mostrar em Precisam de atenção" : "Já sei, não mostrar mais como alerta"}">${ign ? "Voltar a mostrar" : "Ignorar"}</button></div>
+    <div class="cb">
+      ${info.why ? `<div class="win">✓ ${esc(info.why)}</div>` : ""}
+      <ul>${info.fx.map(f => `<li>${esc(f)}</li>`).join("")}</ul>
+      ${info.sev !== "err" && pts.length ? `<div class="win">Vence: <b>${B}</b> (#${num(p.b)}, carrega por último).</div>` : ""}
+      <div class="row">
+        ${info.sev !== "err" && pts.length && !info.why ? `<button class="btn sm" data-a="cfWin" data-v="${esc(p.a)}" data-o="${esc(p.b)}" title="Carregar ${A} depois de ${B}">Fazer ${A} vencer</button>` : ""}
+        <button class="btn sm" data-a="cfOff" data-v="${esc(p.a)}">Desativar ${A}</button>
+        <button class="btn sm" data-a="cfOff" data-v="${esc(p.b)}">Desativar ${B}</button>
+        <span style="flex:1"></span>
+        ${pts.length ? `<button class="btn ghost sm" data-a="cfDet" data-v="${esc(k)}">${open ? "Ocultar detalhes ▴" : `Ver os ${pts.length} ponto(s) ▾`}</button>` : ""}
+      </div>
+      ${open && pts.length ? `<div class="pts">${pts.slice(0, 400).map(x => esc(x.kind === "map" ? "célula " + x.name : x.name)).join("<br>")}${pts.length > 400 ? `<br>… e mais ${pts.length - 400}` : ""}</div>` : ""}
+    </div></div>`;
+}
+
+function cfMatrix(pairs) {
+  const involved = P.active.filter(id => [...pairs.values()].some(p => p.a === id || p.b === id));
+  const num = id => P.active.indexOf(id) + 1;
+  let cells = `<div class="corner"></div>` + involved.map(id => `<div class="hd" title="${esc(modName(id))}">${num(id)}</div>`).join("");
+  for (const r of involved) {
+    cells += `<div class="lb" title="${esc(modName(r))}">#${num(r)} ${esc(modName(r))}</div>`;
+    for (const c of involved) {
+      if (r === c) { cells += `<div class="c d"></div>`; continue; }
+      const k = num(r) < num(c) ? r + "|" + c : c + "|" + r, p = pairs.get(k);
+      if (!p) { cells += `<div class="c"></div>`; continue; }
+      const sev = cfInfo(p).sev, ign = cfIgnored.has(cfStable(p));
+      const bg = {err: "var(--err)", warn: "var(--warn)", info: "var(--info)", ok: "var(--ok)"}[sev];
+      cells += `<div class="c hit" style="background:${bg};opacity:${ign ? .3 : 1}" data-a="cfCell" data-v="${esc(k)}"
+        title="${esc(modName(p.a))} × ${esc(modName(p.b))}: ${CF_SEV[sev][1]}${ign ? " (ignorado)" : ""}. Clique para ver.">${p.points.length > 99 ? "99+" : p.points.length}</div>`;
+    }
+  }
+  return `<div class="mxwrap" style="margin-bottom:16px"><div class="mx" style="grid-template-columns:minmax(160px,240px) repeat(${involved.length},22px)">${cells}</div></div>`;
+}
+
+function viewMap() {
+  if (!P.active.length) return `<div class="empty"><b>Nenhum mod ativo</b>Ative mods em <b>${esc(profLabel())}</b> para ver onde eles se cruzam.</div>`;
+  loadConflicts();
+  const pairs = conflictPairs();
+  const all = [...pairs.values()].map(p => ({p, k: cfStable(p), sev: cfInfo(p).sev}));
+  const order = {err: 0, warn: 1, info: 2, ok: 3};
+  all.sort((x, y) => order[x.sev] - order[y.sev] || y.p.points.length - x.p.points.length);
+  const groups = {
+    att: all.filter(x => !cfIgnored.has(x.k) && x.sev !== "ok"),
+    ok: all.filter(x => !cfIgnored.has(x.k) && x.sev === "ok"),
+    ign: all.filter(x => cfIgnored.has(x.k)),
+  };
+  const serious = groups.att.filter(x => x.sev === "err" || x.sev === "warn").length;
+  const scanning = cfLoading ? `<span class="badge"><span class="spin" style="width:10px;height:10px"></span> verificando scripts e mapas…</span>` : "";
+  const sum = !all.length
+    ? `<div class="cfsum ok"><span class="dot ok"></span><div style="flex:1"><b>${cfLoading ? "Verificando…" : "Nenhum conflito"}</b><div class="sub" style="margin:0">Os ${P.active.length} mods ativos não mexem nas mesmas coisas.</div></div>${scanning}</div>`
+    : `<div class="cfsum ${serious ? "" : "ok"}"><span class="dot ${groups.att.some(x => x.sev === "err") ? "err" : serious ? "warn" : "ok"}"></span><div style="flex:1">
+        <b>${serious ? `${serious} ${plural(serious, "conflito precisa", "conflitos precisam")} da sua atenção` : "Nada sério"}</b>
+        <div class="sub" style="margin:0">Quando dois mods mexem na mesma coisa, vale o que carrega por último. Em cada caso você pode escolher quem vence, desativar um deles ou ignorar o alerta.</div></div>
+        ${scanning}<button class="btn sm" data-a="cfMap">${cfMap ? "Esconder mapa" : "Mapa visual"}</button></div>`;
+  if (!all.length) return sum;
+  if (!groups[cfTab].length) cfTab = groups.att.length ? "att" : groups.ok.length ? "ok" : "ign";
+  const tabs = `<div class="chips" style="margin-bottom:12px">${[["att", "Precisam de atenção"], ["ok", "Esperados"], ["ign", "Ignorados"]].map(([k, l]) =>
+    `<button class="chip ${cfTab === k ? "on" : ""}" data-a="cfTab" data-v="${k}">${l}<span class="n">${groups[k].length}</span></button>`).join("")}</div>`;
+  const list = groups[cfTab].length ? `<div class="list" style="gap:10px">${groups[cfTab].map(x => cfCard(x.p)).join("")}</div>`
+    : `<div class="empty"><b>Nada aqui</b></div>`;
+  return sum + (cfMap ? cfMatrix(pairs) : "") + tabs + list;
+}
+
+function viewSrv() {
+  const servers = S.profiles.filter(p => p.type === "server");
+  return `
+  <div class="grid g2">
+    <div class="card">
+      <h2>Entrar no servidor de outra pessoa</h2>
+      <div class="sub">O jogo baixa sozinho os mods do servidor ao conectar.</div>
+      <div class="checks">
+        <div class="chk"><span class="dot ${S.zb.state === "ok" ? "ok" : "warn"}"></span>${S.zb.state === "ok" ? "ZombieBuddy instalado: pronto para servidores com Viewpoint" : "Se o servidor usa Viewpoint, instale o ZombieBuddy no Painel antes"}</div>
+        <div class="chk"><span class="dot ${S.env.steamRunning ? "ok" : "warn"}"></span>Steam ${S.env.steamRunning ? "aberta" : "fechada (precisa estar aberta para baixar os mods)"}</div>
+      </div>
+      <div class="note">Na primeira conexão, o ZombieBuddy pode pedir aprovação para carregar o Java do Viewpoint. Clique em <b>Sim</b>.</div>
+    </div>
+    <div class="card">
+      <h2>Hospedar o seu servidor</h2>
+      <div class="sub">Configurações criadas em <b>Hospedar</b> no menu do jogo aparecem aqui.</div>
+      <div class="note" style="margin-top:0">Ao editar um servidor, o app atualiza juntos <b>Mods=</b>, <b>WorkshopItems=</b> e os mapas de mods em <b>Map=</b>, com dependências e ordem. Uma cópia de segurança vai para a pasta <code>dados\\backups</code>.</div>
+    </div>
+  </div>
+  <div class="sec"><h3>Seus servidores</h3><span>${servers.length} configuração(ões)</span></div>
+  ${servers.length ? `<div class="list">${servers.map(s => `<div class="mod"><div class="srv">
+      <div class="ic">${ICONS.srv}</div>
+      <div class="nm"><b>${esc(s.label)}</b><span>${esc(s.file)}</span></div>
+      ${s.key === P.key ? `<span class="badge ok">perfil atual</span>` : ""}
+      <button class="btn sm" data-a="folder" data-v="${esc(s.file)}">Arquivo</button>
+      <button class="btn primary sm" data-a="editSrv" data-v="${esc(s.key)}">Editar mods</button>
+    </div></div>`).join("")}</div>`
+    : `<div class="empty"><b>Nenhum servidor ainda</b>No jogo, vá em <b>Hospedar → Gerenciar configurações</b> e crie um. Ele aparece aqui na hora.</div>`}`;
+}
+
+/* ---------- início ---------- */
+(async () => {
+  try {
+    await loadState();
+    render();
+    memIntro();
+    if (Q) renderQueue();
+    loadRec();
+    await fetchRemote(false);
+    await afterChange();
+    // aviso: ZombieBuddy desconfigurado por atualização do jogo
+    if (S.zb.state === "needs_repair")
+      toast("A configuração do ZombieBuddy sumiu (provavelmente uma atualização do jogo). Clique em <b>Reparar</b> no Painel.", "warn", 9000);
+    setInterval(() => fetchRemote(false), 30 * 60 * 1000);
+  } catch (e) {
+    $("#content").innerHTML = `<div class="empty"><b>Erro ao iniciar</b>${esc(e.message)}</div>`;
+  }
+})();
+</script>
+</body>
+</html>

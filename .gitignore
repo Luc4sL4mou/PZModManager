@@ -1,0 +1,7 @@
+﻿# exe da raiz (gerado pelo build.ps1)
+/PZModManager.exe
+/publish/
+/dados/
+src/bin/
+src/obj/
+*.user
