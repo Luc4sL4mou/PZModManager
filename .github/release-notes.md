@@ -1,7 +1,7 @@
 ### English
 **Public beta.** The app works and is in daily use, but it hasn't been tested on many PCs yet. Found a problem? Use the [bug report form](https://github.com/Luc4sL4mou/PZModManager/issues/new/choose).
 
-**How to use:** download `PZModManager-win-x64.zip`, extract it (right-click → **Extract All**) and open `PZModManager.exe`. Nothing to install.
+**How to use:** below, under Assets, download **`PZModManager-win-x64.zip`** — *not* "Source code (zip)", which is only the raw code and has no app in it. Extract it (right-click → **Extract All**) and open `PZModManager.exe`. Nothing to install.
 If you see **"Windows protected your PC"**, click **More info → Run anyway** (the app is not digitally signed yet).
 
 **What's new**
@@ -13,7 +13,7 @@ Zip built by GitHub Actions from the source code, with a build provenance attest
 ### Português
 **Beta público.** O app funciona e é usado no dia a dia, mas ainda foi testado em poucos PCs. Achou um problema? Use o [formulário de bug](https://github.com/Luc4sL4mou/PZModManager/issues/new/choose).
 
-**Como usar:** baixe o `PZModManager-win-x64.zip`, extraia (botão direito → **Extrair tudo**) e abra o `PZModManager.exe`. Não precisa instalar nada.
+**Como usar:** logo abaixo, em Assets, baixe o **`PZModManager-win-x64.zip`** — *não* o "Source code (zip)", que é só o código-fonte e não tem o app dentro. Extraia (botão direito → **Extrair tudo**) e abra o `PZModManager.exe`. Não precisa instalar nada.
 Se aparecer **"O Windows protegeu o computador"**, clique em **Mais informações → Executar assim mesmo** (o app ainda não tem assinatura digital).
 
 **Novidades**
