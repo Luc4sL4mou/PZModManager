@@ -2,6 +2,10 @@
 
 All notable changes to PZ Mod Manager. Downloads: [Releases](https://github.com/Luc4sL4mou/PZModManager/releases).
 
+## [1.2.2] - 2026-11-13 (beta)
+### Fixed
+- The release zip's single-file exe was built with its self-extraction stub compressed, which some antivirus/Windows SmartScreen flagged as a trojan and silently deleted after extraction. Compression is now disabled for the release build, so the `.exe` stays in the zip.
+
 ## [1.2.1] - 2026-11-07 (beta)
 ### Changed
 - Public beta: the release title and the READMEs say so; please report problems through the bug report form.
@@ -34,6 +38,7 @@ All notable changes to PZ Mod Manager. Downloads: [Releases](https://github.com/
 - Automatic backups before changing game files; safe (atomic) writes; no changes while the game is running.
 - Single exe, no installation required.
 
+[1.2.2]: https://github.com/Luc4sL4mou/PZModManager/releases/tag/v1.2.2
 [1.2.1]: https://github.com/Luc4sL4mou/PZModManager/releases/tag/v1.2.1
 [1.2.0]: https://github.com/Luc4sL4mou/PZModManager/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Luc4sL4mou/PZModManager/releases/tag/v1.1.0

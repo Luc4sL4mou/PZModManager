@@ -10,7 +10,7 @@ Remove-Item $out -Recurse -Force -ErrorAction SilentlyContinue
 
 dotnet publish "$root\src\PZModManager.csproj" -c Release -r win-x64 --self-contained true `
   -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
-  -p:EnableCompressionInSingleFile=true -p:DebugType=none -o $stage
+  -p:DebugType=none -o $stage
 if ($LASTEXITCODE -ne 0) { throw "Falha na compilação" }
 
 # no zip vai só o exe (o resto, se houver, é intermediário do publish)
