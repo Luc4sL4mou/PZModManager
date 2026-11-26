@@ -403,7 +403,7 @@ const TR = {
   "Memória do jogo": "Game memory", "Memória do jogo:": "Game memory:", "Memória (RAM) do jogo": "Game memory (RAM)",
   "Quanto da RAM ({}) o Project Zomboid pode usar. {}: pedem cerca de": "How much of your RAM ({0}) Project Zomboid can use. {1}: they need about",
   "configurado hoje:": "currently set:", "Insuficiente": "Insufficient", "Apertado": "Tight", "Sobra pouca RAM": "Little RAM left", "Além do necessário": "More than needed", "Bom": "Good",
-  "Alto risco de o jogo fechar ou travar ao carregar o mundo (falta de memória, como aconteceu com 3 GB).": "High risk of the game closing or freezing while loading the world (out of memory, like with 3 GB).",
+  "Alto risco de o jogo fechar ou travar ao carregar o mundo (falta de memória).": "High risk of the game closing or freezing while loading the world (out of memory).",
   "Deve abrir, mas pode engasgar e travar em áreas grandes ou depois de jogar por muito tempo.": "It should start, but it may stutter and freeze in large areas or after long sessions.",
   "Ficam só {} para o Windows, a Steam, o navegador e a parte do jogo fora do Java: o PC pode ficar lento.": "Only {0} is left for Windows, Steam, your browser and the part of the game outside Java: the PC may slow down.",
   "Funciona, mas não deixa o jogo mais rápido: só tira memória do resto do PC.": "Works, but doesn't make the game faster: it only takes memory from the rest of the PC.",
@@ -691,6 +691,8 @@ const fmtN = n => n == null ? "" : n >= 1e6 ? (n / 1e6).toLocaleString(LOC, {min
 // URL para url('...') em style: o HTML decodifica &#39; antes do CSS, então aspas/parênteses viram %xx
 const cssUrl = u => /^https:\/\//i.test(u || "") ? encodeURI(u).replace(/['()]/g, c => "%" + c.charCodeAt(0).toString(16)) : "";
 const thumbUrl = (u, w = 160, h = 160) => u ? u + (u.includes("?") ? "&" : "?") + `imw=${w}&imh=${h}&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true` : null;
+// o jogo compara só major.minor em versionMin/versionMax (GameVersion.getInt): 42.22.2 cabe em versionMax=42.22
+const cmpGame = (a, b) => cmpVer(...[a, b].map(v => String(v).split(".").slice(0, 2).join(".")));
 function cmpVer(a, b) {
   const pa = String(a).split(".").map(x => parseInt(x) || 0), pb = String(b).split(".").map(x => parseInt(x) || 0);
   for (let i = 0; i < 3; i++) { const d = (pa[i] || 0) - (pb[i] || 0); if (d) return d; }
@@ -818,7 +820,7 @@ const recMem = () => Math.max(Math.min(memMax(), Math.max(3072, Math.ceil(memNee
 const memLowRam = () => memMax() <= Math.min(3072, S.memory.xmxMb);
 function memLevel(v) {
   const need = memNeed().mb, free = S.memory.totalMb - v;
-  if (v < need * 0.75) return {cls: "err", t: "Insuficiente", d: "Alto risco de o jogo fechar ou travar ao carregar o mundo (falta de memória, como aconteceu com 3 GB)."};
+  if (v < need * 0.75) return {cls: "err", t: "Insuficiente", d: "Alto risco de o jogo fechar ou travar ao carregar o mundo (falta de memória)."};
   if (v < need) return {cls: "warn", t: "Apertado", d: "Deve abrir, mas pode engasgar e travar em áreas grandes ou depois de jogar por muito tempo."};
   if (free < 6144) return {cls: "warn", t: "Sobra pouca RAM", d: `Ficam só ${gb(free)} para o Windows, a Steam, o navegador e a parte do jogo fora do Java: o PC pode ficar lento.`};
   if (v >= need * 1.75 && v > 8192) return {cls: "info", t: "Além do necessário", d: "Funciona, mas não deixa o jogo mais rápido: só tira memória do resto do PC."};
@@ -958,13 +960,13 @@ function analyze() {
     for (const x of m.incompatible)
       if (act.has(x)) add(id, "err", `Incompatível com "${modName(x)}".`, {type: "deactivate", id: x, label: "Desativar " + modName(x)});
     if (!m.b42Ok) add(id, "warn", "Não tem pasta para o Build 42: provavelmente é só para o B41 e o jogo vai ignorá-lo.", null, "obs");
-    if (m.versionMin && cmpVer(game, m.versionMin) < 0) add(id, "err", `Exige o jogo na versão ${m.versionMin} ou mais nova (você tem ${game}).`);
-    if (m.versionMax && cmpVer(game, m.versionMax) > 0) add(id, "warn", `Feito para até a versão ${m.versionMax} (você tem ${game}): obsoleto para esta versão.`, null, "obs");
+    if (m.versionMin && cmpGame(game, m.versionMin) < 0) add(id, "err", `Exige o jogo na versão ${m.versionMin} ou mais nova (você tem ${game}).`);
+    if (m.versionMax && cmpGame(game, m.versionMax) > 0) add(id, "warn", `Feito para até a versão ${m.versionMax} (você tem ${game}): obsoleto para esta versão.`, null, "obs");
     const it = itemOf(m);
     if (it?.removed) add(id, "warn", "Não está mais disponível no Workshop (removido ou oculto).", null, "obs");
     if (OBS_NAME.test(`${m.name} ${it?.title || ""}`) || OBS_DESC.test(`${m.description} ${it?.shortDesc || ""}`))
       add(id, "warn", "Marcado pelo autor como obsoleto/descontinuado (no nome ou na descrição). Veja a página: talvez outro mod o substitua.", null, "obs");
-    else if (m.versionMax && cmpVer(game, m.versionMax) <= 0 && game.split(".").slice(0, 2).join(".") === m.versionMax.split(".").slice(0, 2).join("."))
+    else if (m.versionMax && cmpGame(game, m.versionMax) === 0)
       add(id, "info", `Feito para até a versão ${m.versionMax}: deve parar de funcionar na próxima atualização do jogo.`, null, "soon");
     else if (it?.remoteTimeUpdated && nowSec() - it.remoteTimeUpdated > 365 * 86400)
       add(id, "info", `Sem atualização há mais de 1 ano (${ago(it.remoteTimeUpdated)}): pode estar abandonado e quebrar numa atualização do jogo.`, null, "soon");
@@ -1238,7 +1240,8 @@ async function afterChange() {
 function vpStatus() {
   const vpMods = itemMods(VP_ID), zbMods = itemMods(ZB_ID);
   const vpMain = mainMod(vpMods);
-  const ess = REC?.curated?.filter(c => c.group === "essential") || [];
+  const byId = recById();
+  const ess = REC?.curated?.filter(c => c.group === "essential" && byId.has(c.id)) || [];
   return {
     zbSub: I.items.has(ZB_ID),
     zbInst: S.zb.state === "ok",
@@ -1738,9 +1741,11 @@ function recCard(r, note) {
     <div class="ft">${btn}<span class="sp"></span><a style="font-size:12px" data-a="ws" data-v="${r.id}">Workshop ↗</a></div>
   </div>`;
 }
+// itens removidos/ocultos no Workshop saem das recomendações (a menos que já estejam instalados)
+const recById = () => new Map((REC?.items || []).filter(r => !r.removed || I.items.has(r.id)).map(r => [r.id, r]));
 function viewRec() {
   if (!REC) return `<div class="empty"><span class="spin"></span><br><br>Buscando addons do Viewpoint no Workshop…</div>`;
-  const byId = new Map(REC.items.map(r => [r.id, r]));
+  const byId = recById();
   const core = REC.curated.filter(c => c.group === "core" && byId.has(c.id));
   const ess = REC.curated.filter(c => c.group === "essential" && byId.has(c.id));
   const curatedIds = new Set(REC.curated.map(c => c.id));

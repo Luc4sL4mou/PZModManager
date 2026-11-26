@@ -2,6 +2,12 @@
 
 All notable changes to PZ Mod Manager. Downloads: [Releases](https://github.com/Luc4sL4mou/PZModManager/releases).
 
+## [1.2.3] - 2026-11-26 (beta)
+### Fixed
+- Mods were wrongly marked obsolete after a game patch release: like the game, `versionMin`/`versionMax` now compare only major.minor (42.22.2 fits `versionMax=42.22`).
+- Recommended addons that were removed or hidden on the Workshop showed up as blank cards, were counted in "essential addons" and were included in "Subscribe and enable the missing ones". They are now left out.
+- The low-memory warning no longer mentions a developer-specific anecdote.
+
 ## [1.2.2] - 2026-11-13 (beta)
 ### Fixed
 - The release zip's single-file exe was built with its self-extraction stub compressed, which some antivirus/Windows SmartScreen flagged as a trojan and silently deleted after extraction. Compression is now disabled for the release build, so the `.exe` stays in the zip.
